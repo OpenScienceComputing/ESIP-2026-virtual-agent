@@ -104,7 +104,7 @@ claude
 
 `claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md`, `.claude/skills/`, and `.mcp.json`.
 
-This installs Claude Code, points it at AWS Bedrock, installs the [Jupyter MCP server](https://github.com/datalayer/jupyter-mcp-server) so Claude Code can read/edit/execute cells against your live JupyterLab kernel, and generates a `.mcp.json` for this repo (not committed — it holds a live Jupyter token). See `setup_claude_agent.sh` for details.
+This installs Claude Code, points it at AWS Bedrock, writes the `bedrock-class` credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them, ahead of the VM's own instance role), installs the [Jupyter MCP server](https://github.com/datalayer/jupyter-mcp-server) so Claude Code can read/edit/execute cells against your live JupyterLab kernel, and generates a `.mcp.json` for this repo (not committed — it holds a live Jupyter token). See `setup_claude_agent.sh` for details.
 
 ## Step 5 — Build your virtual dataset
 

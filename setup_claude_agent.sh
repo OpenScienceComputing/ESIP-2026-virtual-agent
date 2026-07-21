@@ -85,6 +85,39 @@ done
 # shellcheck disable=SC1090,SC1091
 source "$HOME/.bashrc"
 
+# Also write ~/.aws/credentials (not just shell env vars). This matters
+# because the Jupyter kernel notebooks actually execute in was already
+# running before this script ran - it never sourced ~/.bashrc, so it can't
+# see AWS_ACCESS_KEY_ID/SECRET set above. boto3/obstore/icechunk etc. all
+# re-read ~/.aws/credentials on every call (unlike env vars, which are fixed
+# at process start), and it's checked before the VM's own EC2 instance role
+# in the default credential chain - so this covers the kernel too, no matter
+# when it started.
+mkdir -p "$HOME/.aws"
+AWS_MARKER_BEGIN="# --- ESIP-2026-virtual-agent: bedrock-class credentials (begin) ---"
+AWS_MARKER_END="# --- ESIP-2026-virtual-agent: bedrock-class credentials (end) ---"
+if grep -qF "$AWS_MARKER_BEGIN" "$HOME/.aws/credentials" 2>/dev/null; then
+  echo "    Already configured in ~/.aws/credentials, skipping (edit that file directly to change it)."
+else
+  cat >> "$HOME/.aws/credentials" << EOF
+
+$AWS_MARKER_BEGIN
+[default]
+aws_access_key_id = $BEDROCK_ACCESS_KEY_ID
+aws_secret_access_key = $BEDROCK_SECRET_ACCESS_KEY
+$AWS_MARKER_END
+EOF
+fi
+if ! grep -qF "$AWS_MARKER_BEGIN" "$HOME/.aws/config" 2>/dev/null; then
+  cat >> "$HOME/.aws/config" << EOF
+
+$AWS_MARKER_BEGIN
+[default]
+region = us-west-2
+$AWS_MARKER_END
+EOF
+fi
+
 echo "==> 2/4 Installing Claude Code (native installer, no Node.js needed)"
 curl -fsSL https://claude.ai/install.sh | bash
 
