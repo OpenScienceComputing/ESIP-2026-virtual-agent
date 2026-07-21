@@ -7,18 +7,30 @@
 #
 #   export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 #   export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+#   export JUPYTER_LAB_TOKEN=<the ?token=... value from the browser tab coiled notebook start opened>
 #   bash setup_claude_agent.sh
 #
 # Never hardcode the Bedrock credentials in this file (or any other
 # repo-tracked file) - they're read from the environment and written only to
 # ~/.profile, which lives outside the repo and is never committed.
+#
+# On Coiled, Jupyter runs embedded inside the Dask scheduler process itself
+# (dask/distributed's `jupyter=True` scheduler option), reachable only
+# through Coiled's external https://cluster-xxxx.dask.host/jupyter/ proxy -
+# there's no local jupyter-lab/jupyter-server process or runtime connection
+# file to discover from inside a terminal. The embedded server itself has no
+# token of its own (dask/distributed sets `"token": ""`, relying on Coiled's
+# proxy for access control), but the proxy issues its own token, visible in
+# the URL Coiled opens in your browser (or via `cluster.jupyter_link` from
+# the coiled Python client on your local machine).
 
 set -euo pipefail
 
-if [[ -z "${BEDROCK_ACCESS_KEY_ID:-}" || -z "${BEDROCK_SECRET_ACCESS_KEY:-}" ]]; then
-  echo "ERROR: set BEDROCK_ACCESS_KEY_ID and BEDROCK_SECRET_ACCESS_KEY first, e.g.:" >&2
+if [[ -z "${BEDROCK_ACCESS_KEY_ID:-}" || -z "${BEDROCK_SECRET_ACCESS_KEY:-}" || -z "${JUPYTER_LAB_TOKEN:-}" ]]; then
+  echo "ERROR: set BEDROCK_ACCESS_KEY_ID, BEDROCK_SECRET_ACCESS_KEY, and JUPYTER_LAB_TOKEN first, e.g.:" >&2
   echo "  export BEDROCK_ACCESS_KEY_ID=..." >&2
   echo "  export BEDROCK_SECRET_ACCESS_KEY=..." >&2
+  echo "  export JUPYTER_LAB_TOKEN=...   # from the browser URL: .../jupyter/lab?token=THIS_PART" >&2
   echo "  bash setup_claude_agent.sh" >&2
   exit 1
 fi
@@ -78,46 +90,25 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 echo "==> 3/4 Installing jupyter-mcp-server and registering it for this repo"
 
-# Don't trust whatever `python3` this terminal happens to resolve to - it may
-# be a different conda env (or no env at all) than the one actually running
-# JupyterLab, which is why server discovery could silently find nothing.
-# Instead, find the running Jupyter process and resolve its *actual*
-# interpreter via /proc, so pip/detection below definitely match the server.
-JUPYTER_PID="$(pgrep -f 'jupyter-lab|jupyter-server|jupyter-notebook' | head -1 || true)"
-if [[ -z "$JUPYTER_PID" ]]; then
-  echo "ERROR: no running Jupyter process found (pgrep found nothing) - run this from a JupyterLab terminal." >&2
+# jupyter-mcp-server is a pure network client (HTTP/websocket to JUPYTER_URL)
+# - it doesn't need to run in the same env/process as the Jupyter server, so
+# just install it into whatever's active here (base, per AGENTS.md).
+pip install --quiet jupyter-mcp-server
+
+# Derive the external Coiled proxy hostname (https://cluster-xxxx.dask.host)
+# from the dashboard link env var Coiled sets on the VM; the embedded
+# Jupyter server is only reachable through this proxy, not locally.
+if [[ -z "${DASK_DISTRIBUTED__DASHBOARD__LINK:-}" ]]; then
+  echo "ERROR: DASK_DISTRIBUTED__DASHBOARD__LINK is not set - can't derive the cluster's external URL. Are you on a coiled notebook VM?" >&2
   exit 1
 fi
-JUPYTER_PYTHON="$(readlink -f "/proc/$JUPYTER_PID/exe")"
-echo "    Found Jupyter server (pid $JUPYTER_PID), using its Python: $JUPYTER_PYTHON"
+CLUSTER_HOST="$(grep -oE 'https://[^/]+' <<< "$DASK_DISTRIBUTED__DASHBOARD__LINK" | head -1)"
+JUPYTER_URL="${CLUSTER_HOST}/jupyter/"
+JUPYTER_TOKEN="$JUPYTER_LAB_TOKEN"
+MCP_TOKEN="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+JUPYTER_MCP_BIN="$(command -v jupyter-mcp-server)"
 
-"$JUPYTER_PYTHON" -m pip install --quiet jupyter-mcp-server
-
-JUPYTER_INFO="$("$JUPYTER_PYTHON" - << 'PY'
-import sys
-try:
-    from jupyter_server.serverapp import list_running_servers
-except ImportError:
-    from notebook.notebookapp import list_running_servers
-
-servers = list(list_running_servers())
-if not servers:
-    sys.exit("no running Jupyter server found")
-
-s = servers[0]
-host = s.get("hostname") or "127.0.0.1"
-if host in ("0.0.0.0", "*", ""):
-    host = "127.0.0.1"
-print(f"http://{host}:{s['port']}")
-print(s.get("token", ""))
-PY
-)" || { echo "ERROR: could not read the running Jupyter server's connection info." >&2; exit 1; }
-
-JUPYTER_URL="$(sed -n '1p' <<< "$JUPYTER_INFO")"
-JUPYTER_TOKEN="$(sed -n '2p' <<< "$JUPYTER_INFO")"
-MCP_TOKEN="$("$JUPYTER_PYTHON" -c 'import secrets; print(secrets.token_hex(32))')"
-# jupyter-mcp-server's console script lands next to the interpreter we used to pip-install it.
-JUPYTER_MCP_BIN="$(dirname "$JUPYTER_PYTHON")/jupyter-mcp-server"
+echo "    Jupyter URL: $JUPYTER_URL"
 
 # NOTE: verify this against the currently-installed jupyter-mcp-server's own
 # --help/docs before the event - its env var names and required MCP_TOKEN

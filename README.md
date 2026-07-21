@@ -86,11 +86,16 @@ cd ~/ESIP-2026-virtual-agent
 
 ## Step 4 — Set up Claude Code
 
-Still in that terminal:
+First find your notebook's Jupyter token: look at the browser tab that opened automatically when you ran `coiled notebook start` — the URL looks like `https://cluster-xxxx.dask.host/jupyter/lab?token=THIS_PART`. Copy the part after `token=`.
+
+(Why: on Coiled, Jupyter runs embedded inside the Dask scheduler process, reachable only through Coiled's external proxy — there's no local Jupyter process or token to auto-detect from inside a terminal.)
+
+Then, still in that terminal:
 
 ```bash
 export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+export JUPYTER_LAB_TOKEN=<the token you just copied>
 bash setup_claude_agent.sh
 source ~/.bashrc
 cd ~/ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here
