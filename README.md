@@ -34,7 +34,7 @@ Accept shell initialization when prompted, then open a new terminal. Everywhere 
 ## Step 1 — Install and authenticate Coiled
 
 ```bash
-conda create -n coiled coiled -y
+conda create -n coiled -c conda-forge coiled -y
 conda activate coiled
 export DASK_COILED__TOKEN=<group-api-token>
 ```
