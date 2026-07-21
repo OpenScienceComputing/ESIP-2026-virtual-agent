@@ -6,8 +6,9 @@ error, the file genuinely had 0 bytes in the source repo. **This one file
 has been patched locally** with NetCDF/HDF5 guidance adapted from
 `~/.claude/skills/building-virtual-icechunk-stores` (personal, not repo
 content), since NetCDF/HDF5 is one of this workshop's three target formats.
-A PR upstreaming this fix was opened — see earth-mover/agent-skills. If/when
-it merges, this local patch can be dropped on the next refresh.
+A PR upstreaming this fix was opened:
+https://github.com/earth-mover/agent-skills/pull/3. If/when it merges, this
+local patch can be dropped on the next refresh.
 
 `SKILL.md` links to three format docs that don't exist anywhere upstream
 (checked both this pinned commit and current `main` as of 2026-07-21):
