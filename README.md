@@ -36,10 +36,10 @@ Accept shell initialization when prompted, then open a new terminal. Everywhere 
 ```bash
 conda create -n coiled -c conda-forge coiled -y
 conda activate coiled
-export DASK_COILED__TOKEN=<group-api-token>
+coiled login --token <group-api-token>
 ```
 
-The first `coiled` command you run (e.g. `coiled notebook start` below) will print a one-time device-authorization link like:
+This will print a one-time device-authorization link like:
 
 ```
 Visit the following page to authorize this computer:
