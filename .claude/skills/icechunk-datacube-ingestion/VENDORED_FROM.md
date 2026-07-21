@@ -22,6 +22,15 @@ target formats — worth re-checking on refresh in case Earthmover fixes it
 upstream, and possibly worth filing as an issue against
 earth-mover/agent-skills.
 
+`COLLECT-DATACUBE-INGESTION-REQUIREMENTS.md` asked "virtual or native?"
+once, then a generic schema/organization question with no branching logic —
+so the agent could end up asking chunk-size/shape questions after the user
+already chose virtual ingestion, which can't be rechunked without switching
+to native. **Patched locally** to scope that question by the earlier
+answer. PR upstreaming this fix:
+https://github.com/earth-mover/agent-skills/pull/4.
+
 To refresh: re-download `SKILL.md`, `COLLECT-DATACUBE-INGESTION-REQUIREMENTS.md`,
 and everything under `formats/` from the current `main` branch and update the
-commit hash above.
+commit hash above — re-apply the two local patches above if their PRs
+haven't merged yet.
