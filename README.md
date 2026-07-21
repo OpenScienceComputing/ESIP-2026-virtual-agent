@@ -25,6 +25,8 @@ Accept shell initialization when prompted, then open a new terminal. Everywhere 
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
+Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited.
+
 1. Go to this repo on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
 3. Wait for it to build, then open a terminal in the Codespace (it's a full Linux environment with conda preinstalled — see above) and continue with Step 1 below.
