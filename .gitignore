@@ -1,6 +1,9 @@
 # Generated per-attendee by setup_claude_agent.sh - contains a live Jupyter token
 .mcp.json
 
+# Shared Bedrock/Coiled credentials - never commit these
+.secrets/
+
 # Jupyter / Python
 .ipynb_checkpoints/
 __pycache__/
