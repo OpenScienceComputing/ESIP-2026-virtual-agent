@@ -75,8 +75,11 @@ export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 bash setup_claude_agent.sh
 source ~/.bashrc
+cd ~/ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here
 claude
 ```
+
+`claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md`, `.claude/skills/`, and `.mcp.json`.
 
 This installs Claude Code, points it at AWS Bedrock, installs the [Jupyter MCP server](https://github.com/datalayer/jupyter-mcp-server) so Claude Code can read/edit/execute cells against your live JupyterLab kernel, and generates a `.mcp.json` for this repo (not committed — it holds a live Jupyter token). See `setup_claude_agent.sh` for details.
 

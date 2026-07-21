@@ -146,4 +146,5 @@ echo "at .claude/skills/ - no separate install step needed."
 echo
 echo "Next steps:"
 echo "  Open a new terminal (it'll pick up ~/.bashrc automatically), or run 'source ~/.bashrc' in this one, then:"
+echo "  cd $REPO_ROOT"
 echo "  claude"
