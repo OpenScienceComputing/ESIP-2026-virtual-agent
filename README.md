@@ -99,4 +99,8 @@ Sample prompt to get started:
 
 > Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test. I'd like others to be able to open the icechunk.
 
+## Beyond this workshop
+
+For your own future scientific work, also check out [Claude Science](https://claude.com/product/claude-science), Anthropic's AI workbench for research (databases, compute, and reusable skills for genomics, proteomics, structural biology, and more). It's a different product from Claude Code — built for Claude.ai Pro/Max/Team/Enterprise plans rather than the Bedrock-billed setup used here — so it's not part of this breakout, but worth knowing about.
+
 Write your Icechunk store under `s3://esip-qhub-public/esip2026-breakout/<your-name-or-dataset>/` — the shared `bedrock-class` credentials are scoped to write only under that prefix (reads are public bucket-wide).
