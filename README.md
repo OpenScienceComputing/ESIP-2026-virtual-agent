@@ -39,6 +39,16 @@ conda activate coiled
 export DASK_COILED__TOKEN=<group-api-token>
 ```
 
+The first `coiled` command you run (e.g. `coiled notebook start` below) will print a one-time device-authorization link like:
+
+```
+Visit the following page to authorize this computer:
+  https://cloud.coiled.io/activate-token?id=...
+Validation code: ...
+```
+
+Open that link, confirm, and it saves credentials to `~/.config/dask/coiled.yaml` — this only happens once per machine/Codespace, not on every command.
+
 ## Step 2 — Launch a remote JupyterLab on AWS
 
 ```bash
