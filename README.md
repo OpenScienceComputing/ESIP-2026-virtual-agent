@@ -23,6 +23,14 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 Accept shell initialization when prompted, then open a new terminal. Everywhere below that says `conda create`/`conda activate`, substitute `micromamba create`/`micromamba activate`.
 
+### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
+
+1. Go to this repo on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent
+2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
+3. Wait for it to build, then open a terminal in the Codespace (it's a full Linux environment with conda preinstalled — see above) and continue with Step 1 below.
+
+(Or, with the [`gh` CLI](https://cli.github.com/) installed locally: `gh codespace create --repo OpenScienceComputing/ESIP-2026-virtual-agent && gh codespace code`.)
+
 ## Step 1 — Install and authenticate Coiled
 
 ```bash
