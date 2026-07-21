@@ -12,7 +12,7 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 ## Prerequisites
 
-- A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace/machine — with `conda` (or `mamba`/`miniforge`) installed.
+- A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace — with `conda` (or `mamba`/`miniforge`) installed. GitHub Codespaces' default image already includes conda, so nothing to install there.
 - The shared Coiled group token and shared Bedrock AWS credentials, both announced at the start of the breakout — don't share or commit them.
 
 ## Step 1 — Install and authenticate Coiled
