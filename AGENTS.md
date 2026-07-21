@@ -4,8 +4,8 @@
 
 - Use the `base` conda environment to run Python — the `esip-notebook` Coiled software environment is baked in as `base` on these VMs, so it already has `icechunk`, `virtualizarr`, `xarray`, `obstore`, `rioxarray`, and everything else these notebooks need. Do not create a new environment or `pip install` packages unless explicitly asked.
 - Run scripts with `conda run -n base python <script>`.
-- For interactive notebook work — editing cells and inspecting real outputs — connect to the running JupyterLab kernel (also `base`) via the Jupyter MCP.
-- To just verify a notebook runs top-to-bottom without an interactive kernel, execute it to a scratch copy so the tracked file isn't touched: `conda run -n base jupyter nbconvert --execute --to notebook --output-dir /tmp <notebook>`.
+- Edit notebook cells with the built-in `NotebookEdit` tool — there's no live Jupyter kernel connection available on these VMs (see CLAUDE.md).
+- To actually run a notebook and capture real outputs/errors, execute it in place: `conda run -n base jupyter nbconvert --execute --to notebook --inplace <notebook>`. For a quick check without touching the tracked file, use `--output-dir /tmp` instead of `--inplace`.
 
 ## Working discipline
 

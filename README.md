@@ -86,25 +86,20 @@ cd ~/ESIP-2026-virtual-agent
 
 ## Step 4 — Set up Claude Code
 
-First find your notebook's Jupyter token: look at the browser tab that opened automatically when you ran `coiled notebook start` — the URL looks like `https://cluster-xxxx.dask.host/jupyter/lab?token=THIS_PART`. Copy the part after `token=`.
-
-(Why: on Coiled, Jupyter runs embedded inside the Dask scheduler process, reachable only through Coiled's external proxy — there's no local Jupyter process or token to auto-detect from inside a terminal.)
-
-Then, still in that terminal:
-
 ```bash
 export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
-export JUPYTER_LAB_TOKEN=<the token you just copied>
 bash setup_claude_agent.sh
 source ~/.bashrc
 cd ~/ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here
 claude
 ```
 
-`claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md`, `.claude/skills/`, and `.mcp.json`.
+`claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md` and `.claude/skills/`.
 
-This installs Claude Code, points it at AWS Bedrock, writes the `bedrock-class` credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them, ahead of the VM's own instance role), installs the [Jupyter MCP server](https://github.com/datalayer/jupyter-mcp-server) so Claude Code can read/edit/execute cells against your live JupyterLab kernel, and generates a `.mcp.json` for this repo (not committed — it holds a live Jupyter token). See `setup_claude_agent.sh` for details.
+This installs Claude Code, points it at AWS Bedrock, and writes the `bedrock-class` credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them, ahead of the VM's own instance role). See `setup_claude_agent.sh` for details.
+
+Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection on these VMs. Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy with its own token, which wasn't worth the reliability cost for this workshop.
 
 ## Step 5 — Build your virtual dataset
 
