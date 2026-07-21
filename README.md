@@ -12,7 +12,7 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 ## Prerequisites
 
-- A Linux machine (your own laptop, or a GitHub Codespace/machine) with `conda` (or `mamba`/`miniforge`) installed.
+- A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace/machine — with `conda` (or `mamba`/`miniforge`) installed.
 - The shared Coiled group token and shared Bedrock AWS credentials, both announced at the start of the breakout — don't share or commit them.
 
 ## Step 1 — Install and authenticate Coiled
@@ -57,3 +57,5 @@ This installs Claude Code, points it at AWS Bedrock, installs the [Jupyter MCP s
 Look at [`examples/taranto-icechunk-append.ipynb`](examples/taranto-icechunk-append.ipynb) for a worked example of a real virtual Icechunk workflow (create-or-append, date-diffing, per-file normalization before concat). It targets a different workshop's storage, so read it for the pattern rather than running it directly — see [`examples/README.md`](examples/README.md).
 
 Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn into a virtual Icechunk or Arraylake store. The `icechunk-datacube-ingestion` skill vendored in this repo (`.claude/skills/`, from [earth-mover/agent-skills](https://github.com/earth-mover/agent-skills)) will guide Claude Code through gathering requirements, scanning your data, planning the ingestion, and validating the result.
+
+Write your Icechunk store under `s3://esip-qhub-public/esip2026-breakout/<your-name-or-dataset>/` — the shared `bedrock-class` credentials are scoped to write only under that prefix (reads are public bucket-wide).
