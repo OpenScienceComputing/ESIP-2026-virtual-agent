@@ -37,9 +37,13 @@ Requires your own (free) GitHub account — the Codespace runs under your accoun
 
 ```bash
 conda create -n coiled -c conda-forge coiled -y
+conda init bash
+source ~/.bashrc
 conda activate coiled
 coiled login --token <group-api-token>
 ```
+
+(`conda init bash` + `source ~/.bashrc` is a one-time step — a fresh shell won't let you `conda activate` at all otherwise, failing with something like "Your shell has not been properly configured to use 'conda activate'". You'll only need to do this once per machine/Codespace.)
 
 This will print a one-time device-authorization link like:
 
