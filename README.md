@@ -57,19 +57,31 @@ Open that link, confirm, and it saves credentials to `~/.config/dask/coiled.yaml
 
 ## Step 2 — Launch a remote JupyterLab on AWS
 
-Give it a `--name` that identifies you — this is how we'll tell everyone's machines apart in the shared `esip-lab` workspace:
+First grab the setup script that pre-clones this repo onto the VM:
 
 ```bash
-coiled notebook start --name <your-name>-esip2026 --region us-west-2 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
+curl -O https://raw.githubusercontent.com/OpenScienceComputing/ESIP-2026-virtual-agent/main/host_setup.sh
 ```
 
-## Step 3 — Clone this repo
-
-In a terminal inside the JupyterLab that just opened:
+Then launch, with a `--name` that identifies you — this is how we'll tell everyone's machines apart in the shared `esip-lab` workspace:
 
 ```bash
-git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
-cd ESIP-2026-virtual-agent
+coiled notebook start --name <your-name>-esip2026 --region us-west-2 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook --host-setup-script host_setup.sh
+```
+
+## Step 3 — Open this repo
+
+`--host-setup-script` should have already cloned this repo to `~/ESIP-2026-virtual-agent` on the VM before it even finished booting. In a terminal inside the JupyterLab that just opened:
+
+```bash
+cd ~/ESIP-2026-virtual-agent
+```
+
+If that directory doesn't exist (e.g. the host-setup step didn't run for some reason), just clone it yourself instead:
+
+```bash
+git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git ~/ESIP-2026-virtual-agent
+cd ~/ESIP-2026-virtual-agent
 ```
 
 ## Step 4 — Set up Claude Code
