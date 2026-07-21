@@ -1,0 +1,8 @@
+# Generated per-attendee by setup_claude_agent.sh - contains a live Jupyter token
+.mcp.json
+
+# Jupyter / Python
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.env

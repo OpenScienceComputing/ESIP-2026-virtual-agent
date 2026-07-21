@@ -1,3 +1,55 @@
 # ESIP-2026-virtual-agent
 
 Notebooks and scripts supporting a breakout group at the ESIP 2026 Summer Meeting, where participants will use agentic coding to create workflows that build virtual Icechunk and Arraylake datasets.
+
+## Overview
+
+You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/), then use [Claude Code](https://claude.com/claude-code) from a terminal inside that JupyterLab — routed through AWS Bedrock, billed via ESIP's AWS credits — to build a notebook that virtualizes a collection of NetCDF, GeoTIFF, or GRIB files into an Icechunk or Arraylake store.
+
+## Prerequisites
+
+- A Linux machine (your own laptop, or a GitHub Codespace/machine) with `conda` (or `mamba`/`miniforge`) installed.
+- The shared Coiled group token and shared Bedrock AWS credentials, both announced at the start of the breakout — don't share or commit them.
+
+## Step 1 — Install and authenticate Coiled
+
+```bash
+conda create -n coiled coiled -y
+conda activate coiled
+export DASK_COILED__TOKEN=<group-api-token>
+```
+
+## Step 2 — Launch a remote JupyterLab on AWS
+
+```bash
+coiled notebook start --region us-west-2 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
+```
+
+## Step 3 — Clone this repo
+
+In a terminal inside the JupyterLab that just opened:
+
+```bash
+git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
+cd ESIP-2026-virtual-agent
+```
+
+## Step 4 — Set up Claude Code
+
+Still in that terminal:
+
+```bash
+export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
+export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+bash setup_claude_agent.sh
+source ~/.profile
+claude
+```
+
+This installs Claude Code, points it at AWS Bedrock, installs the [Jupyter MCP server](https://github.com/datalayer/jupyter-mcp-server) so Claude Code can read/edit/execute cells against your live JupyterLab kernel, and generates a `.mcp.json` for this repo (not committed — it holds a live Jupyter token). See `setup_claude_agent.sh` for details.
+
+## Step 5 — Build your virtual dataset
+
+Look at [`examples/taranto-icechunk-append.ipynb`](examples/taranto-icechunk-append.ipynb) for a worked example of a real virtual Icechunk workflow (create-or-append, date-diffing, per-file normalization before concat). It targets a different workshop's storage, so read it for the pattern rather than running it directly — see [`examples/README.md`](examples/README.md).
+
+Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn into a virtual Icechunk or Arraylake store. The `icechunk-datacube-ingestion` skill vendored in this repo (`.claude/skills/`, from [earth-mover/agent-skills](https://github.com/earth-mover/agent-skills)) will guide Claude Code through gathering requirements, scanning your data, planning the ingestion, and validating the result.
