@@ -1,8 +1,13 @@
 Vendored from https://github.com/earth-mover/agent-skills at commit
 `1b3c994161a84aace30fccabd1ccd9bdc01d5cc9` (icechunk-datacube-ingestion/).
 
-`formats/HDF5.md` is an empty stub upstream at this commit — that's not a
-copy error, the file genuinely has 0 bytes in the source repo.
+`formats/HDF5.md` was an empty stub upstream at this commit — not a copy
+error, the file genuinely had 0 bytes in the source repo. **This one file
+has been patched locally** with NetCDF/HDF5 guidance adapted from
+`~/.claude/skills/building-virtual-icechunk-stores` (personal, not repo
+content), since NetCDF/HDF5 is one of this workshop's three target formats.
+A PR upstreaming this fix was opened — see earth-mover/agent-skills. If/when
+it merges, this local patch can be dropped on the next refresh.
 
 `SKILL.md` links to three format docs that don't exist anywhere upstream
 (checked both this pinned commit and current `main` as of 2026-07-21):
