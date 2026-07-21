@@ -97,6 +97,6 @@ Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn 
 
 Sample prompt to get started:
 
-> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test.
+> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test. I'd like others to be able to open the icechunk.
 
 Write your Icechunk store under `s3://esip-qhub-public/esip2026-breakout/<your-name-or-dataset>/` — the shared `bedrock-class` credentials are scoped to write only under that prefix (reads are public bucket-wide).
