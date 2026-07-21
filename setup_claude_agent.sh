@@ -25,6 +25,19 @@ fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+echo "==> 0/4 Making sure 'conda activate' works in JupyterLab terminals"
+CONDA_BASE="$(conda info --base 2>/dev/null || true)"
+if [[ -n "$CONDA_BASE" && -f "$CONDA_BASE/etc/profile.d/conda.sh" ]]; then
+  # shellcheck disable=SC1091
+  source "$CONDA_BASE/etc/profile.d/conda.sh"
+  if ! grep -q "conda initialize" "$HOME/.bashrc" 2>/dev/null; then
+    conda init bash > /dev/null
+    echo "    Ran 'conda init bash' - new terminals will have 'conda activate' available (this one already does, via the sourced hook above)."
+  fi
+else
+  echo "    No conda found on PATH - skipping (this step is a nice-to-have, not required for the rest of this script)."
+fi
+
 echo "==> 1/4 Writing Bedrock + Claude Code config to ~/.profile"
 PROFILE_MARKER_BEGIN="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (begin) ---"
 PROFILE_MARKER_END="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (end) ---"
@@ -53,9 +66,23 @@ echo "==> 2/4 Installing Claude Code (native installer, no Node.js needed)"
 curl -fsSL https://claude.ai/install.sh | bash
 
 echo "==> 3/4 Installing jupyter-mcp-server and registering it for this repo"
-pip install --quiet jupyter-mcp-server
 
-JUPYTER_INFO="$(python3 - << 'PY'
+# Don't trust whatever `python3` this terminal happens to resolve to - it may
+# be a different conda env (or no env at all) than the one actually running
+# JupyterLab, which is why server discovery could silently find nothing.
+# Instead, find the running Jupyter process and resolve its *actual*
+# interpreter via /proc, so pip/detection below definitely match the server.
+JUPYTER_PID="$(pgrep -f 'jupyter-lab|jupyter-server|jupyter-notebook' | head -1 || true)"
+if [[ -z "$JUPYTER_PID" ]]; then
+  echo "ERROR: no running Jupyter process found (pgrep found nothing) - run this from a JupyterLab terminal." >&2
+  exit 1
+fi
+JUPYTER_PYTHON="$(readlink -f "/proc/$JUPYTER_PID/exe")"
+echo "    Found Jupyter server (pid $JUPYTER_PID), using its Python: $JUPYTER_PYTHON"
+
+"$JUPYTER_PYTHON" -m pip install --quiet jupyter-mcp-server
+
+JUPYTER_INFO="$("$JUPYTER_PYTHON" - << 'PY'
 import sys
 try:
     from jupyter_server.serverapp import list_running_servers
@@ -73,11 +100,13 @@ if host in ("0.0.0.0", "*", ""):
 print(f"http://{host}:{s['port']}")
 print(s.get("token", ""))
 PY
-)" || { echo "ERROR: could not detect a running Jupyter server - run this from a JupyterLab terminal." >&2; exit 1; }
+)" || { echo "ERROR: could not read the running Jupyter server's connection info." >&2; exit 1; }
 
 JUPYTER_URL="$(sed -n '1p' <<< "$JUPYTER_INFO")"
 JUPYTER_TOKEN="$(sed -n '2p' <<< "$JUPYTER_INFO")"
-MCP_TOKEN="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+MCP_TOKEN="$("$JUPYTER_PYTHON" -c 'import secrets; print(secrets.token_hex(32))')"
+# jupyter-mcp-server's console script lands next to the interpreter we used to pip-install it.
+JUPYTER_MCP_BIN="$(dirname "$JUPYTER_PYTHON")/jupyter-mcp-server"
 
 # NOTE: verify this against the currently-installed jupyter-mcp-server's own
 # --help/docs before the event - its env var names and required MCP_TOKEN
@@ -86,7 +115,7 @@ cat > "$REPO_ROOT/.mcp.json" << EOF
 {
   "mcpServers": {
     "jupyter": {
-      "command": "jupyter-mcp-server",
+      "command": "$JUPYTER_MCP_BIN",
       "env": {
         "JUPYTER_URL": "$JUPYTER_URL",
         "JUPYTER_TOKEN": "$JUPYTER_TOKEN",
