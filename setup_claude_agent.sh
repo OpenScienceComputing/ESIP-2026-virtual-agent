@@ -25,15 +25,20 @@ fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "==> 0/4 Making sure 'conda activate' works in JupyterLab terminals"
+echo "==> 0/4 Making sure new terminals land in the 'base' conda environment"
 CONDA_BASE="$(conda info --base 2>/dev/null || true)"
 if [[ -n "$CONDA_BASE" && -f "$CONDA_BASE/etc/profile.d/conda.sh" ]]; then
   # shellcheck disable=SC1091
   source "$CONDA_BASE/etc/profile.d/conda.sh"
   if ! grep -q "conda initialize" "$HOME/.bashrc" 2>/dev/null; then
     conda init bash > /dev/null
-    echo "    Ran 'conda init bash' - new terminals will have 'conda activate' available (this one already does, via the sourced hook above)."
+    echo "    Ran 'conda init bash' - new terminals will have 'conda activate' available."
   fi
+  # conda init alone only auto-activates base if this setting is on - some
+  # cloud images ship with it off, so new terminals would still start bare.
+  conda config --set auto_activate_base true
+  conda activate base
+  echo "    'base' conda env is active here, and new terminals will auto-activate it too."
 else
   echo "    No conda found on PATH - skipping (this step is a nice-to-have, not required for the rest of this script)."
 fi
