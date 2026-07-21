@@ -95,4 +95,8 @@ Look at [`examples/taranto-icechunk-append.ipynb`](examples/taranto-icechunk-app
 
 Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn into a virtual Icechunk or Arraylake store. The `icechunk-datacube-ingestion` skill vendored in this repo (`.claude/skills/`, from [earth-mover/agent-skills](https://github.com/earth-mover/agent-skills)) will guide Claude Code through gathering requirements, scanning your data, planning the ingestion, and validating the result.
 
+Sample prompt to get started:
+
+> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test.
+
 Write your Icechunk store under `s3://esip-qhub-public/esip2026-breakout/<your-name-or-dataset>/` — the shared `bedrock-class` credentials are scoped to write only under that prefix (reads are public bucket-wide).
