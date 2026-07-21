@@ -25,25 +25,7 @@ fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "==> 1/6 Checking for Node.js/npm"
-if ! command -v npm >/dev/null 2>&1; then
-  echo "    npm not found - installing Node.js into the current environment"
-  if command -v mamba >/dev/null 2>&1; then
-    mamba install -y -c conda-forge nodejs
-  elif command -v conda >/dev/null 2>&1; then
-    conda install -y -c conda-forge nodejs
-  else
-    echo "ERROR: npm is missing and there's no conda/mamba on PATH to install Node.js." >&2
-    echo "Install Node.js some other way (e.g. nvm) and re-run this script." >&2
-    exit 1
-  fi
-fi
-
-echo "==> 2/6 Giving npm a user-writable global prefix (no sudo on this image)"
-mkdir -p "$HOME/.npm-global"
-npm config set prefix "$HOME/.npm-global"
-
-echo "==> 3/6 Writing Bedrock + Claude Code config to ~/.profile"
+echo "==> 1/4 Writing Bedrock + Claude Code config to ~/.profile"
 PROFILE_MARKER_BEGIN="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (begin) ---"
 PROFILE_MARKER_END="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (end) ---"
 if grep -qF "$PROFILE_MARKER_BEGIN" "$HOME/.profile" 2>/dev/null; then
@@ -52,7 +34,7 @@ else
   cat >> "$HOME/.profile" << EOF
 
 $PROFILE_MARKER_BEGIN
-export PATH="\$HOME/.npm-global/bin:\$PATH"
+export PATH="\$HOME/.local/bin:\$PATH"
 export AWS_ACCESS_KEY_ID="$BEDROCK_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$BEDROCK_SECRET_ACCESS_KEY"
 export AWS_REGION=us-west-2
@@ -67,10 +49,10 @@ fi
 # shellcheck disable=SC1090
 source "$HOME/.profile"
 
-echo "==> 4/6 Installing Claude Code"
-npm install -g @anthropic-ai/claude-code
+echo "==> 2/4 Installing Claude Code (native installer, no Node.js needed)"
+curl -fsSL https://claude.ai/install.sh | bash
 
-echo "==> 5/6 Installing jupyter-mcp-server and registering it for this repo"
+echo "==> 3/4 Installing jupyter-mcp-server and registering it for this repo"
 pip install --quiet jupyter-mcp-server
 
 JUPYTER_INFO="$(python3 - << 'PY'
@@ -117,7 +99,7 @@ cat > "$REPO_ROOT/.mcp.json" << EOF
 EOF
 echo "    Wrote $REPO_ROOT/.mcp.json (git-ignored - contains a live Jupyter token)"
 
-echo "==> 6/6 Done"
+echo "==> 4/4 Done"
 echo
 echo "The icechunk-datacube-ingestion skill is already available in this repo"
 echo "at .claude/skills/ - no separate install step needed."
