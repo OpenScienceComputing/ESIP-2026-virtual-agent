@@ -38,13 +38,18 @@ else
   echo "    No conda found on PATH - skipping (this step is a nice-to-have, not required for the rest of this script)."
 fi
 
-echo "==> 1/4 Writing Bedrock + Claude Code config to ~/.profile"
+echo "==> 1/4 Writing Bedrock + Claude Code config to ~/.bashrc and ~/.profile"
+# ~/.bashrc: sourced by the non-login interactive shells JupyterLab terminals
+# spawn - this is what makes new terminals "just work" without a manual step.
+# ~/.profile: sourced by login shells (e.g. SSH'ing in directly) - kept too,
+# belt-and-suspenders, in case attendees use this repo outside JupyterLab.
 PROFILE_MARKER_BEGIN="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (begin) ---"
 PROFILE_MARKER_END="# --- ESIP-2026-virtual-agent: Claude Code via Bedrock (end) ---"
-if grep -qF "$PROFILE_MARKER_BEGIN" "$HOME/.profile" 2>/dev/null; then
-  echo "    Already configured in ~/.profile, skipping (edit that file directly to change it)."
-else
-  cat >> "$HOME/.profile" << EOF
+for RC_FILE in "$HOME/.bashrc" "$HOME/.profile"; do
+  if grep -qF "$PROFILE_MARKER_BEGIN" "$RC_FILE" 2>/dev/null; then
+    echo "    Already configured in $RC_FILE, skipping (edit that file directly to change it)."
+  else
+    cat >> "$RC_FILE" << EOF
 
 $PROFILE_MARKER_BEGIN
 export PATH="\$HOME/.local/bin:\$PATH"
@@ -58,9 +63,10 @@ export CLAUDE_CODE_USE_BEDROCK=1
 export ANTHROPIC_DEFAULT_SONNET_MODEL=us.anthropic.claude-sonnet-4-6
 $PROFILE_MARKER_END
 EOF
-fi
-# shellcheck disable=SC1090
-source "$HOME/.profile"
+  fi
+done
+# shellcheck disable=SC1090,SC1091
+source "$HOME/.bashrc"
 
 echo "==> 2/4 Installing Claude Code (native installer, no Node.js needed)"
 curl -fsSL https://claude.ai/install.sh | bash
@@ -134,5 +140,5 @@ echo "The icechunk-datacube-ingestion skill is already available in this repo"
 echo "at .claude/skills/ - no separate install step needed."
 echo
 echo "Next steps:"
-echo "  source ~/.profile"
+echo "  Open a new terminal (it'll pick up ~/.bashrc automatically), or run 'source ~/.bashrc' in this one, then:"
 echo "  claude"

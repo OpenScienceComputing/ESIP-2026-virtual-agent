@@ -74,7 +74,7 @@ Still in that terminal:
 export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 bash setup_claude_agent.sh
-source ~/.profile
+source ~/.bashrc
 claude
 ```
 
