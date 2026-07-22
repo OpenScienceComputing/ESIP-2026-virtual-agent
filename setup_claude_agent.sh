@@ -31,23 +31,22 @@ if [[ -z "${BEDROCK_ACCESS_KEY_ID:-}" || -z "${BEDROCK_SECRET_ACCESS_KEY:-}" ]];
   exit 1
 fi
 
-echo "==> 0/3 Making sure new terminals land in the 'base' conda environment"
-CONDA_BASE="$(conda info --base 2>/dev/null || true)"
-if [[ -n "$CONDA_BASE" && -f "$CONDA_BASE/etc/profile.d/conda.sh" ]]; then
-  # shellcheck disable=SC1091
-  source "$CONDA_BASE/etc/profile.d/conda.sh"
-  if ! grep -q "conda initialize" "$HOME/.bashrc" 2>/dev/null; then
-    conda init bash > /dev/null
-    echo "    Ran 'conda init bash' - new terminals will have 'conda activate' available."
-  fi
-  # conda init alone only auto-activates base if this setting is on - some
-  # cloud images ship with it off, so new terminals would still start bare.
-  conda config --set auto_activate_base true
-  conda activate base
-  echo "    'base' conda env is active here, and new terminals will auto-activate it too."
+echo "==> 0/3 Making sure new terminals can find the esip-notebook Python environment"
+# On these Coiled VMs, conda's own name-based activation is unreliable -
+# `conda run -n base ...` fails with a libmamba "prefix does not exist"
+# error even though the environment itself is fine and CONDA_PREFIX is
+# already set correctly (Coiled sets it at the container level, not via a
+# normal `conda activate`). Skip conda's resolution entirely and just put
+# that environment's bin/ directly on PATH.
+if [[ -n "${CONDA_PREFIX:-}" && -d "${CONDA_PREFIX}/bin" ]]; then
+  echo "    Found the environment at $CONDA_PREFIX"
+  ENV_BIN="$CONDA_PREFIX/bin"
 else
-  echo "    No conda found on PATH - skipping (this step is a nice-to-have, not required for the rest of this script)."
+  echo "    CONDA_PREFIX not set/valid - skipping (next steps don't strictly need this)."
+  ENV_BIN=""
 fi
+ENV_BIN_PREFIX=""
+[[ -n "$ENV_BIN" ]] && ENV_BIN_PREFIX="$ENV_BIN:"
 
 echo "==> 1/3 Writing Bedrock + Claude Code config to ~/.bashrc and ~/.profile"
 # ~/.bashrc: sourced by the non-login interactive shells JupyterLab terminals
@@ -63,7 +62,7 @@ for RC_FILE in "$HOME/.bashrc" "$HOME/.profile"; do
     cat >> "$RC_FILE" << EOF
 
 $PROFILE_MARKER_BEGIN
-export PATH="\$HOME/.local/bin:\$PATH"
+export PATH="\$HOME/.local/bin:$ENV_BIN_PREFIX\$PATH"
 export AWS_ACCESS_KEY_ID="$BEDROCK_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$BEDROCK_SECRET_ACCESS_KEY"
 export AWS_REGION=us-west-2
