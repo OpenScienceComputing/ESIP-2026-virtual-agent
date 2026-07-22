@@ -30,20 +30,12 @@ Requires your own (free) GitHub account — the Codespace runs under your accoun
 ```bash
 python3 -m pip install --user coiled
 export PATH="$HOME/.local/bin:$PATH"
-coiled login --token <group-api-token>
+export DASK_COILED__TOKEN=<group-api-token>
 ```
 
 `pip install` here is deliberate — a `conda create -c conda-forge coiled` install works too, but conda's dependency solve can take several minutes (especially on Codespaces), where `pip install` finishes in seconds since `coiled` is a plain Python package. The `export PATH` line only applies to your current terminal; add it to `~/.bashrc`/`~/.profile` if you want it to persist across new terminals, or just re-run it each time.
 
-This will print a one-time device-authorization link like:
-
-```
-Visit the following page to authorize this computer:
-  https://cloud.coiled.io/activate-token?id=...
-Validation code: ...
-```
-
-Open that link, confirm, and it saves credentials to `~/.config/dask/coiled.yaml` — this only happens once per machine/Codespace, not on every command.
+The group token has already been through Coiled's one-time device-authorization step, so `export DASK_COILED__TOKEN=...` alone is enough — no `coiled login`, no browser link to click, works immediately on any machine.
 
 ## Step 2 — Launch a remote JupyterLab on AWS
 
