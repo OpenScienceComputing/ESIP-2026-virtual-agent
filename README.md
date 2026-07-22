@@ -4,6 +4,8 @@ Notebooks and scripts supporting a breakout group at the ESIP 2026 Summer Meetin
 
 **Date:** Tuesday, July 28, 2026
 
+> This branch (`skypilot-explore`) provisions the notebook VM directly on AWS with [SkyPilot](https://skypilot.co/) — no Coiled account/workspace needed. There's also a [`main`](https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent) branch that uses [Coiled](https://www.coiled.io/) instead. Both are viable; this branch is newer and more validated as of this writing.
+
 ## Overview
 
 You'll use [SkyPilot](https://skypilot.co/) to launch a JupyterLab VM on AWS, then use [Claude Code](https://claude.com/claude-code) from a terminal on that VM — routed through AWS Bedrock, billed via ESIP's AWS credits — to build a notebook that virtualizes a collection of NetCDF, GeoTIFF, or GRIB files into an Icechunk or Arraylake store.
