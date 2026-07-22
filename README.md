@@ -54,11 +54,15 @@ sky check aws
 
 ## Step 3 — Launch a notebook VM on AWS
 
+Pick the AWS region your source data actually lives in — compute close to the data, not wherever happens to have spare capacity. `us-east-1` covers most AWS Open Data (including the NOAA CDR sample data below) and this workshop's own S3 bucket; use `us-west-2` if you're working with `esip-qhub-public` instead.
+
 ```bash
 export MACHINE_NAME="${GITHUB_USER:-$USER}-esip2026"
 export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
-sky launch -c "$MACHINE_NAME" notebook.sky.yaml --env JUPYTER_TOKEN -y -d
+sky launch -c "$MACHINE_NAME" notebook.sky.yaml --infra aws/us-east-1 --env JUPYTER_TOKEN -y -d
 ```
+
+(Swap `--infra aws/us-west-2` if that's where your data is. `--infra` is required, not optional — without it SkyPilot picks whatever AWS region happens to have capacity, which may not be near your data.)
 
 `MACHINE_NAME` picks up your GitHub username automatically on a Codespace (`$GITHUB_USER`, set by Codespaces itself) or your system username elsewhere (`$USER`) — this is how we'll tell everyone's machines apart in the shared AWS account. `export MACHINE_NAME=whatever-you-like-esip2026` instead if you'd rather set it explicitly.
 
@@ -72,8 +76,6 @@ echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
 ```
 
 Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8888: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8888:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
-
-By default this launches wherever SkyPilot finds AWS capacity (commonly `us-east-1`, matching most AWS Open Data and this workshop's S3 bucket). To pin a region — e.g. if your source data is in `us-west-2` — add `--infra aws/us-west-2` to the `sky launch` command.
 
 ## Step 4 — Set up Claude Code
 
