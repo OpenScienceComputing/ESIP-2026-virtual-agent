@@ -2,7 +2,7 @@
 
 ## Claude Code
 
-There's no live Jupyter MCP connection on these VMs — Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy URL with its own token, which wasn't worth the reliability cost for this workshop. To actually run a notebook and see real outputs/errors (not just edit source), execute it with `nbconvert` — see AGENTS.md.
+There's no live Jupyter MCP connection set up on these VMs for this workshop, kept simple/proven rather than wired up. To actually run a notebook and see real outputs/errors (not just edit source), execute it with `nbconvert` — see AGENTS.md.
 
 **Do not use the built-in `NotebookEdit` tool for multi-line cell content.** It has been observed to mangle cell source — literal `\n` characters (and stray quote characters) end up baked into the rendered cell instead of real line breaks. Instead, create/edit notebooks with a short Python script using `nbformat` (a standard `nbconvert` dependency, always available here):
 

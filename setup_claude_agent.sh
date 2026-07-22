@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Set up Claude Code (via AWS Bedrock) in a coiled-hosted JupyterLab terminal
+# Set up Claude Code (via AWS Bedrock) on a SkyPilot-launched notebook VM
 # for the ESIP 2026 virtual-agent breakout.
 #
-# Run this from a terminal INSIDE the JupyterLab launched by
-# `coiled notebook start ...`, from within a clone of this repo:
+# Run this from a terminal on the VM launched by `sky launch ... notebook.sky.yaml`
+# (SSH in with `ssh <your-cluster-name>`, or use the JupyterLab browser terminal),
+# from within ~/sky_workdir (this repo, synced there automatically):
 #
 #   export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 #   export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
@@ -15,11 +16,8 @@
 # committed.
 #
 # Claude Code edits .ipynb files with its built-in NotebookEdit tool, and
-# verifies them with `jupyter nbconvert --execute` (see AGENTS.md) rather
-# than a live Jupyter MCP connection - Coiled runs Jupyter embedded inside
-# the Dask scheduler process, reachable only through an external per-cluster
-# proxy URL with its own token, which made a reliable MCP connection more
-# trouble than it was worth for this workshop.
+# verifies them with `jupyter nbconvert --execute` (see AGENTS.md), rather
+# than a live Jupyter MCP connection - kept simple/proven for this workshop.
 
 set -euo pipefail
 
@@ -31,18 +29,14 @@ if [[ -z "${BEDROCK_ACCESS_KEY_ID:-}" || -z "${BEDROCK_SECRET_ACCESS_KEY:-}" ]];
   exit 1
 fi
 
-echo "==> 0/3 Making sure new terminals can find the esip-notebook Python environment"
-# On these Coiled VMs, conda's own name-based activation is unreliable -
-# `conda run -n base ...` fails with a libmamba "prefix does not exist"
-# error even though the environment itself is fine and CONDA_PREFIX is
-# already set correctly (Coiled sets it at the container level, not via a
-# normal `conda activate`). Skip conda's resolution entirely and just put
-# that environment's bin/ directly on PATH.
-if [[ -n "${CONDA_PREFIX:-}" && -d "${CONDA_PREFIX}/bin" ]]; then
-  echo "    Found the environment at $CONDA_PREFIX"
-  ENV_BIN="$CONDA_PREFIX/bin"
+echo "==> 0/3 Making sure new terminals can find the esip2026 Python environment"
+# notebook.sky.yaml creates a micromamba environment named 'esip2026' during
+# setup - put its bin/ on PATH so a bare python/pip/jupyter resolves to it.
+ENV_BIN="$HOME/micromamba/envs/esip2026/bin"
+if [[ -d "$ENV_BIN" ]]; then
+  echo "    Found the environment at $ENV_BIN"
 else
-  echo "    CONDA_PREFIX not set/valid - skipping (next steps don't strictly need this)."
+  echo "    WARNING: $ENV_BIN not found - was this VM launched from notebook.sky.yaml?" >&2
   ENV_BIN=""
 fi
 ENV_BIN_PREFIX=""
@@ -120,6 +114,6 @@ echo "The icechunk-datacube-ingestion skill is already available in this repo"
 echo "at .claude/skills/ - no separate install step needed."
 echo
 echo "Next steps:"
-echo "  Close this terminal and open a new one from the JupyterLab launcher, then:"
-echo "  cd ESIP-2026-virtual-agent"
+echo "  Open a new terminal - SSH in again, or use the JupyterLab launcher's Terminal tile - then:"
+echo "  cd ~/sky_workdir"
 echo "  claude"

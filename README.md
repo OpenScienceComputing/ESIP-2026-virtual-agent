@@ -4,16 +4,14 @@ Notebooks and scripts supporting a breakout group at the ESIP 2026 Summer Meetin
 
 **Date:** Tuesday, July 28, 2026
 
-> Note: the shared Coiled group token in `.secrets/` expires ~2026-07-31, so it's valid through the event — no need to regenerate.
-
 ## Overview
 
-You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/), then use [Claude Code](https://claude.com/claude-code) from a terminal inside that JupyterLab — routed through AWS Bedrock, billed via ESIP's AWS credits — to build a notebook that virtualizes a collection of NetCDF, GeoTIFF, or GRIB files into an Icechunk or Arraylake store.
+You'll use [SkyPilot](https://skypilot.co/) to launch a JupyterLab VM on AWS, then use [Claude Code](https://claude.com/claude-code) from a terminal on that VM — routed through AWS Bedrock, billed via ESIP's AWS credits — to build a notebook that virtualizes a collection of NetCDF, GeoTIFF, or GRIB files into an Icechunk or Arraylake store.
 
 ## Prerequisites
 
 - A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace — with Python 3 and `pip`. Virtually every machine already has this; no conda/mamba needed for this step.
-- The shared Coiled group token and shared Bedrock AWS credentials, both announced at the start of the breakout — don't share or commit them.
+- The shared Bedrock AWS credentials, announced at the start of the breakout — don't share or commit them. These are the *only* credentials you need: they authenticate SkyPilot (to launch the VM), Claude Code (to reach Bedrock), and notebook code (to write to S3).
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
@@ -25,69 +23,69 @@ Requires your own (free) GitHub account — the Codespace runs under your accoun
 
 (Or, with the [`gh` CLI](https://cli.github.com/) installed locally: `gh codespace create --repo OpenScienceComputing/ESIP-2026-virtual-agent && gh codespace code`.)
 
-## Step 1 — Install and authenticate Coiled
-
-```bash
-python3 -m pip install --user coiled
-export PATH="$HOME/.local/bin:$PATH"
-export DASK_COILED__TOKEN=<group-api-token>
-```
-
-`pip install` here is deliberate — a `conda create -c conda-forge coiled` install works too, but conda's dependency solve can take several minutes (especially on Codespaces), where `pip install` finishes in seconds since `coiled` is a plain Python package. The `export PATH` line only applies to your current terminal; add it to `~/.bashrc`/`~/.profile` if you want it to persist across new terminals, or just re-run it each time.
-
-`export DASK_COILED__TOKEN=...` alone is enough to authenticate — no `coiled login` step needed.
-
-## Step 2 — Launch a remote JupyterLab on AWS
-
-Give it a `--name` that identifies you — this is how we'll tell everyone's machines apart in the shared `esip-lab` workspace.
-
-Pick `--region` based on where your source data lives — `us-east-1` for most AWS Open Data (including the NOAA CDR sample data below), `us-west-2` if you're working with `esip-qhub-public`. Either works; matching region to data avoids cross-region latency/egress:
-
-```bash
-coiled notebook start --name <your-name>-esip2026 --region us-east-1 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
-```
-
-The first time you actually launch a VM from a given machine, Coiled prints a one-time device-authorization link, even though the group token itself is already active:
-
-```
-Visit the following page to authorize this computer:
-  https://cloud.coiled.io/activate-token?id=...
-Validation code: ...
-```
-
-Open it and confirm — this is per-machine, not per-command, so it won't happen again on this same machine.
-
-(Swap `--region us-west-2` if that's where your data is.)
-
-## Step 3 — Clone this repo
-
-In the JupyterLab launcher that just opened, select Terminal:
+## Step 1 — Clone this repo
 
 ```bash
 git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
 cd ESIP-2026-virtual-agent
 ```
 
-## Step 4 — Set up Claude Code
+You need this locally before launching anything — the VM launch config (`notebook.sky.yaml`) lives here, and this whole directory gets synced to the VM automatically when you launch.
+
+## Step 2 — Install SkyPilot and authenticate
 
 ```bash
+python3 -m pip install --user "skypilot[aws]"
+export PATH="$HOME/.local/bin:$PATH"
+export AWS_ACCESS_KEY_ID=<shared key id, announced at the event>
+export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+sky check aws
+```
+
+`sky check aws` should report AWS as enabled. No account, no login, no invite — SkyPilot just needs valid AWS credentials, which you already have.
+
+## Step 3 — Launch a notebook VM on AWS
+
+```bash
+export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
+sky launch -c <your-name>-esip2026 notebook.sky.yaml --env JUPYTER_TOKEN -y -d
+```
+
+`-d` (`--detach-run`) is required — without it, `sky launch` would wait for JupyterLab (a long-running server) to exit, which never happens, and just hang your terminal instead of returning control.
+
+This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Check progress and get the URL once it's ready:
+
+```bash
+sky status <your-name>-esip2026 --endpoint 8888
+```
+
+Once that prints an address, open `http://<that address>/lab?token=$JUPYTER_TOKEN` in your browser (run `echo $JUPYTER_TOKEN` if you need to see the token again).
+
+By default this launches wherever SkyPilot finds AWS capacity (commonly `us-east-1`, matching most AWS Open Data and this workshop's S3 bucket). To pin a region — e.g. if your source data is in `us-west-2` — add `--infra aws/us-west-2` to the `sky launch` command.
+
+## Step 4 — Set up Claude Code
+
+Open a terminal on the VM — either SSH in (`ssh <your-name>-esip2026`, using the alias SkyPilot just set up for you) or use the Terminal tile in the JupyterLab launcher you just opened. Either way, land in `~/sky_workdir` (this repo, already synced there):
+
+```bash
+cd ~/sky_workdir
 export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 bash setup_claude_agent.sh
 ```
 
-Then **close this terminal and open a new one from the JupyterLab launcher** — that's what picks up everything the script just configured. In the new terminal:
+Then open a **new** terminal (SSH in again, or a new JupyterLab Terminal tile) — that's what picks up everything the script just configured:
 
 ```bash
-cd ESIP-2026-virtual-agent
+cd ~/sky_workdir
 claude
 ```
 
 `claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md` and `.claude/skills/`.
 
-This installs Claude Code, points it at AWS Bedrock, and writes the `bedrock-class` credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them, ahead of the VM's own instance role). See `setup_claude_agent.sh` for details.
+This installs Claude Code, points it at AWS Bedrock, and writes the same credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them). See `setup_claude_agent.sh` for details.
 
-Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection on these VMs. Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy with its own token, which wasn't worth the reliability cost for this workshop.
+Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection set up on these VMs for this workshop.
 
 ## Step 5 — Build your virtual dataset
 
@@ -99,7 +97,15 @@ Sample prompt to get started:
 
 > Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip2026-breakout/\<your name\> object storage so anyone can access
 
-Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`, in `us-east-1` — a bucket dedicated to this workshop, writable by the shared `bedrock-class` credentials (reads are public bucket-wide). Use this regardless of which `--region` you launched your notebook in: virtual references are tiny (just manifests, not copies of the source data), so the store's own region doesn't matter the way the notebook VM's region does.
+Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`, in `us-east-1` — a bucket dedicated to this workshop, writable by the shared credentials (reads are public bucket-wide). Use this regardless of which region you launched your VM in: virtual references are tiny (just manifests, not copies of the source data), so the store's own region doesn't matter the way the VM's region does.
+
+## When you're done
+
+```bash
+sky down <your-name>-esip2026
+```
+
+Tears down the VM immediately. If you forget, `notebook.sky.yaml` sets a 30-minute idle auto-shutdown as a safety net, but don't rely on it — clean up when you're finished.
 
 ## Beyond this workshop
 

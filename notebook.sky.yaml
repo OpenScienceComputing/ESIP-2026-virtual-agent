@@ -1,0 +1,57 @@
+# SkyPilot task: launch a JupyterLab VM on AWS for the ESIP 2026 breakout.
+#
+#   export AWS_ACCESS_KEY_ID=<shared key id, announced at the event>
+#   export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+#   export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
+#   sky launch -c <your-name>-esip2026 notebook.sky.yaml --env JUPYTER_TOKEN -y -d
+#
+# -d (--detach-run) is required: without it, `sky launch` waits for the run
+# command to finish, which never happens for a long-running server like
+# JupyterLab - it would just hang your terminal instead of returning control.
+#
+# Then, once it's up:
+#   sky status <your-name>-esip2026 --endpoint 8888
+# Open http://<that endpoint>/lab?token=$JUPYTER_TOKEN in your browser
+# (echo $JUPYTER_TOKEN if you need to see it again).
+
+name: esip2026-notebook
+
+# Syncs this repo to ~/sky_workdir on the VM - no separate git clone needed
+# once you're on the VM, and CLAUDE.md/.claude/skills/examples all just work.
+workdir: .
+
+resources:
+  infra: aws
+  cpus: 4
+  disk_size: 50
+  ports: 8888
+  autostop:
+    idle_minutes: 30
+    down: true
+    wait_for: jobs_and_ssh
+
+envs:
+  JUPYTER_TOKEN: ""
+
+setup: |
+  "${SHELL}" <(curl -L https://micro.mamba.pm/install.sh) < /dev/null
+  export PATH="$HOME/.local/bin:$PATH"
+  micromamba create -y -n esip2026 -c conda-forge \
+    python=3.12 jupyterlab ipywidgets ipympl \
+    icechunk virtualizarr zarr xarray dask distributed \
+    arraylake obstore s3fs fsspec h5netcdf h5py cftime nc-time-axis cf_xarray \
+    rioxarray rasterio gdal pyproj cartopy geopandas shapely \
+    hvplot geoviews datashader holoviews panel bokeh \
+    pandas numpy matplotlib
+  micromamba run -n esip2026 pip install --quiet "gribberish[virtualizarr]" virtual_tiff
+
+run: |
+  if [ -z "$JUPYTER_TOKEN" ]; then
+    echo "ERROR: JUPYTER_TOKEN is not set. Launch with --env JUPYTER_TOKEN (see the header of this file)." >&2
+    exit 1
+  fi
+  export PATH="$HOME/.local/bin:$PATH"
+  eval "$(micromamba shell hook --shell bash)"
+  micromamba activate esip2026
+  cd ~/sky_workdir
+  jupyter lab --no-browser --ip=0.0.0.0 --port=8888 --IdentityProvider.token="$JUPYTER_TOKEN"
