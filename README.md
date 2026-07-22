@@ -59,7 +59,7 @@ coiled notebook start --name <your-name>-esip2026 --region us-east-1 --vm-type m
 
 ## Step 3 — Clone this repo
 
-In a terminal inside the JupyterLab that just opened:
+In the JupyterLab launcher that just opened, select Terminal:
 
 ```bash
 git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
