@@ -21,13 +21,15 @@ Requires your own (free) GitHub account — the Codespace runs under your accoun
 
 1. Go to this branch on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent/tree/skypilot-explore
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on skypilot-explore**.
-3. Wait for it to build, then open a terminal in the Codespace and continue with Step 1 below.
+3. Wait for it to build, then open a terminal in the Codespace. The repo is already cloned there (Codespaces does this automatically) at `/workspaces/ESIP-2026-virtual-agent` — `cd` there, **skip Step 1 below**, and continue with Step 2.
 
 (Or, with the [`gh` CLI](https://cli.github.com/) installed locally: `gh codespace create --repo OpenScienceComputing/ESIP-2026-virtual-agent --branch skypilot-explore && gh codespace code`.)
 
 Either way, make sure the Codespace actually opened on `skypilot-explore`, not `main` — the default branch is the Coiled-based version and doesn't have `notebook.sky.yaml`.
 
 ## Step 1 — Clone this repo
+
+Skip this step if you're on a Codespace — it's already cloned (see above). Otherwise:
 
 ```bash
 git clone --branch skypilot-explore https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
