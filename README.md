@@ -87,10 +87,10 @@ Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn 
 
 Sample prompt to get started:
 
-> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip-qhub-public/esip2026-breakout/\<your name\> object storage so anyone can access
+> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip2026-breakout/\<your name\> object storage so anyone can access
 
 ## Beyond this workshop
 
 For your own future scientific work, also check out [Claude Science](https://claude.com/product/claude-science), Anthropic's AI workbench for research (databases, compute, and reusable skills for genomics, proteomics, structural biology, and more). It's a different product from Claude Code — built for Claude.ai Pro/Max/Team/Enterprise plans rather than the Bedrock-billed setup used here — so it's not part of this breakout, but worth knowing about.
 
-Write your Icechunk store under `s3://esip-qhub-public/esip2026-breakout/<your-name-or-dataset>/` — the shared `bedrock-class` credentials are scoped to write only under that prefix (reads are public bucket-wide).
+Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/` — a bucket dedicated to this workshop, in `us-east-1` (same region as most AWS Open Data, including the NOAA CDR sample data above). The shared `bedrock-class` credentials can write anywhere in this bucket (reads are public bucket-wide). `s3://esip-qhub-public/esip2026-breakout/` in `us-west-2` also still works if you'd rather use that.
