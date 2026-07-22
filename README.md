@@ -19,7 +19,7 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
-Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited.
+Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited. Make sure you're signed in at github.com first — the **Codespaces** tab in the next step won't show up if you're logged out.
 
 1. Go to this repo on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
@@ -87,6 +87,8 @@ claude
 
 `claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md` and `.claude/skills/`.
 
+The first time you run it, Claude Code will ask "Do you trust the files in this folder?" — say yes, this is the repo you just cloned.
+
 This installs Claude Code, points it at AWS Bedrock, and writes the `bedrock-class` credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them, ahead of the VM's own instance role). See `setup_claude_agent.sh` for details.
 
 Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection on these VMs. Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy with its own token, which wasn't worth the reliability cost for this workshop.
@@ -106,6 +108,10 @@ Once that succeeds, try:
 > Make a notebook that visualizes the icechunk using hvplot
 
 Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`, in `us-east-1` — a bucket dedicated to this workshop, writable by the shared `bedrock-class` credentials (reads are public bucket-wide). Use this regardless of which `--region` you launched your notebook in: virtual references are tiny (just manifests, not copies of the source data), so the store's own region doesn't matter the way the notebook VM's region does.
+
+Don't be alarmed if Claude Code hits errors along the way and keeps iterating — reading a traceback, adjusting, and retrying is normal agentic behavior, not a sign something is broken. Let it keep working.
+
+If you close your terminal or come back later, just `cd ESIP-2026-virtual-agent && claude` again — it's the same repo, and you can ask it to re-run the notebook it built for you rather than remembering the exact command yourself.
 
 ## Beyond this workshop
 
