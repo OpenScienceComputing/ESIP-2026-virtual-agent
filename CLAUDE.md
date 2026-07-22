@@ -2,7 +2,22 @@
 
 ## Claude Code
 
-Edit `.ipynb` files with the built-in `NotebookEdit` tool. There's no live Jupyter MCP connection on these VMs — Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy URL with its own token, which wasn't worth the reliability cost for this workshop. To actually run a notebook and see real outputs/errors (not just edit source), execute it with `nbconvert` — see AGENTS.md.
+There's no live Jupyter MCP connection on these VMs — Coiled runs Jupyter embedded inside the Dask scheduler process, reachable only through a per-cluster external proxy URL with its own token, which wasn't worth the reliability cost for this workshop. To actually run a notebook and see real outputs/errors (not just edit source), execute it with `nbconvert` — see AGENTS.md.
+
+**Do not use the built-in `NotebookEdit` tool for multi-line cell content.** It has been observed to mangle cell source — literal `\n` characters (and stray quote characters) end up baked into the rendered cell instead of real line breaks. Instead, create/edit notebooks with a short Python script using `nbformat` (a standard `nbconvert` dependency, always available here):
+
+```python
+import nbformat as nbf
+
+nb = nbf.v4.new_notebook()
+nb["cells"] = [
+    nbf.v4.new_markdown_cell("# A title\n\nSome explanation."),
+    nbf.v4.new_code_cell("import xarray as xr\nds = xr.open_zarr(...)"),
+]
+nbf.write(nb, "notebook.ipynb")
+```
+
+Cell source can be a real multi-line Python string (triple-quoted, or with actual `\n` inside a normal string — both work fine here since Python and `nbformat` handle the escaping correctly, unlike `NotebookEdit`). To edit an existing notebook, `nbf.read(path, as_version=4)`, modify `nb["cells"]`, then `nbf.write(nb, path)`. After writing, spot-check by reading the file back and confirming no literal `\n`/`\\n` shows up in any cell's rendered source before considering the notebook done.
 
 Task-specific guidance lives in skills under `.claude/skills/` and loads automatically when relevant:
 
