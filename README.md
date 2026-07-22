@@ -55,19 +55,19 @@ sky check aws
 ## Step 3 — Launch a notebook VM on AWS
 
 ```bash
-export CLUSTER_NAME="${GITHUB_USER:-$USER}-esip2026"
+export MACHINE_NAME="${GITHUB_USER:-$USER}-esip2026"
 export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
-sky launch -c "$CLUSTER_NAME" notebook.sky.yaml --env JUPYTER_TOKEN -y -d
+sky launch -c "$MACHINE_NAME" notebook.sky.yaml --env JUPYTER_TOKEN -y -d
 ```
 
-`CLUSTER_NAME` picks up your GitHub username automatically on a Codespace (`$GITHUB_USER`, set by Codespaces itself) or your system username elsewhere (`$USER`) — this is how we'll tell everyone's machines apart in the shared AWS account. `export CLUSTER_NAME=whatever-you-like-esip2026` instead if you'd rather set it explicitly.
+`MACHINE_NAME` picks up your GitHub username automatically on a Codespace (`$GITHUB_USER`, set by Codespaces itself) or your system username elsewhere (`$USER`) — this is how we'll tell everyone's machines apart in the shared AWS account. `export MACHINE_NAME=whatever-you-like-esip2026` instead if you'd rather set it explicitly.
 
 `-d` (`--detach-run`) is required — without it, `sky launch` would wait for JupyterLab (a long-running server) to exit, which never happens, and just hang your terminal instead of returning control.
 
 This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Check progress and get the URL once it's ready:
 
 ```bash
-sky status "$CLUSTER_NAME" --endpoint 8888
+sky status "$MACHINE_NAME" --endpoint 8888
 ```
 
 Once that prints an address, open `http://<that address>/lab?token=$JUPYTER_TOKEN` in your browser (run `echo $JUPYTER_TOKEN` if you need to see the token again).
@@ -76,7 +76,7 @@ By default this launches wherever SkyPilot finds AWS capacity (commonly `us-east
 
 ## Step 4 — Set up Claude Code
 
-Open a terminal on the VM — either SSH in (`ssh "$CLUSTER_NAME"`, using the alias SkyPilot just set up for you) or use the Terminal tile in the JupyterLab launcher you just opened. Either way, land in `~/sky_workdir` (this repo, already synced there):
+Open a terminal on the VM — either SSH in (`ssh "$MACHINE_NAME"`, using the alias SkyPilot just set up for you) or use the Terminal tile in the JupyterLab launcher you just opened. Either way, land in `~/sky_workdir` (this repo, already synced there):
 
 ```bash
 cd ~/sky_workdir
@@ -113,7 +113,7 @@ Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`
 ## When you're done
 
 ```bash
-sky down "${CLUSTER_NAME:-${GITHUB_USER:-$USER}-esip2026}"
+sky down "${MACHINE_NAME:-${GITHUB_USER:-$USER}-esip2026}"
 ```
 
 Tears down the VM immediately. If you forget, `notebook.sky.yaml` sets a 30-minute idle auto-shutdown as a safety net, but don't rely on it — clean up when you're finished.
