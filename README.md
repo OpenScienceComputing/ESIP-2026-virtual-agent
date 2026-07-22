@@ -12,16 +12,8 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 ## Prerequisites
 
-- A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace — with `conda` (or `mamba`/`miniforge`) installed. GitHub Codespaces' default image already includes conda, so nothing to install there.
+- A Linux machine (or WSL, or macOS) — your own laptop, or a GitHub Codespace — with Python 3 and `pip`. Virtually every machine already has this; no conda/mamba needed for this step.
 - The shared Coiled group token and shared Bedrock AWS credentials, both announced at the start of the breakout — don't share or commit them.
-
-**No conda?** Install [micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html) instead (Linux/WSL/macOS):
-
-```bash
-"${SHELL}" <(curl -L https://micro.mamba.pm/install.sh)
-```
-
-Accept shell initialization when prompted, then open a new terminal. Everywhere below that says `conda create`/`conda activate`, substitute `micromamba create`/`micromamba activate`.
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
@@ -29,21 +21,19 @@ Requires your own (free) GitHub account — the Codespace runs under your accoun
 
 1. Go to this repo on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
-3. Wait for it to build, then open a terminal in the Codespace (it's a full Linux environment with conda preinstalled — see above) and continue with Step 1 below.
+3. Wait for it to build, then open a terminal in the Codespace and continue with Step 1 below.
 
 (Or, with the [`gh` CLI](https://cli.github.com/) installed locally: `gh codespace create --repo OpenScienceComputing/ESIP-2026-virtual-agent && gh codespace code`.)
 
 ## Step 1 — Install and authenticate Coiled
 
 ```bash
-conda create -n coiled -c conda-forge coiled -y
-conda init bash
-source ~/.bashrc
-conda activate coiled
+python3 -m pip install --user coiled
+export PATH="$HOME/.local/bin:$PATH"
 coiled login --token <group-api-token>
 ```
 
-(`conda init bash` + `source ~/.bashrc` is a one-time step — a fresh shell won't let you `conda activate` at all otherwise, failing with something like "Your shell has not been properly configured to use 'conda activate'". You'll only need to do this once per machine/Codespace.)
+`pip install` here is deliberate — a `conda create -c conda-forge coiled` install works too, but conda's dependency solve can take several minutes (especially on Codespaces), where `pip install` finishes in seconds since `coiled` is a plain Python package. The `export PATH` line only applies to your current terminal; add it to `~/.bashrc`/`~/.profile` if you want it to persist across new terminals, or just re-run it each time.
 
 This will print a one-time device-authorization link like:
 
