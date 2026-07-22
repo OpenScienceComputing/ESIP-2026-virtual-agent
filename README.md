@@ -35,7 +35,7 @@ export DASK_COILED__TOKEN=<group-api-token>
 
 `pip install` here is deliberate — a `conda create -c conda-forge coiled` install works too, but conda's dependency solve can take several minutes (especially on Codespaces), where `pip install` finishes in seconds since `coiled` is a plain Python package. The `export PATH` line only applies to your current terminal; add it to `~/.bashrc`/`~/.profile` if you want it to persist across new terminals, or just re-run it each time.
 
-The group token has already been through Coiled's one-time device-authorization step, so `export DASK_COILED__TOKEN=...` alone is enough — no `coiled login`, no browser link to click, works immediately on any machine.
+`export DASK_COILED__TOKEN=...` alone is enough to authenticate — no `coiled login` step needed.
 
 ## Step 2 — Launch a remote JupyterLab on AWS
 
@@ -46,6 +46,16 @@ Pick `--region` based on where your source data lives — `us-east-1` for most A
 ```bash
 coiled notebook start --name <your-name>-esip2026 --region us-east-1 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
 ```
+
+The first time you actually launch a VM from a given machine, Coiled prints a one-time device-authorization link, even though the group token itself is already active:
+
+```
+Visit the following page to authorize this computer:
+  https://cloud.coiled.io/activate-token?id=...
+Validation code: ...
+```
+
+Open it and confirm — this is per-machine, not per-command, so it won't happen again on this same machine.
 
 (Swap `--region us-west-2` if that's where your data is.)
 
