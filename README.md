@@ -72,8 +72,12 @@ cd ESIP-2026-virtual-agent
 export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 bash setup_claude_agent.sh
-source ~/.bashrc
-cd ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here (JupyterLab terminals always start in the notebook root)
+```
+
+Then **close this terminal and open a new one from the JupyterLab launcher** — that's what picks up everything the script just configured. In the new terminal:
+
+```bash
+cd ESIP-2026-virtual-agent
 claude
 ```
 
