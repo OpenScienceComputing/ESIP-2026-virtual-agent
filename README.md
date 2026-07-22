@@ -50,7 +50,7 @@ Open that link, confirm, and it saves credentials to `~/.config/dask/coiled.yaml
 Give it a `--name` that identifies you — this is how we'll tell everyone's machines apart in the shared `esip-lab` workspace:
 
 ```bash
-coiled notebook start --name <your-name>-esip2026 --region us-west-2 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
+coiled notebook start --name <your-name>-esip2026 --region us-east-1 --vm-type m5.xlarge --workspace esip-lab --disk-size 50GB --software esip-notebook
 ```
 
 ## Step 3 — Clone this repo
