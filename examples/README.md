@@ -21,6 +21,20 @@ Read it for the pattern, not to execute it:
 - `Repository.open(...)` falling back to `Repository.create(...)`, then
   `writable_session` + `ds.vz.to_icechunk(...)` + `commit(...)`.
 
+## `taranto-icechunk-append.py`
+
+An earlier, simpler plain-Python version of the same Taranto append
+workflow (from a different prior workshop's `scripts/` directory) —
+appends just the single latest NOS/OUS file rather than date-diffing a
+whole batch, and also targets `protocoast-data` storage, not this
+workshop's. Useful as a shorter, linear read of the same core steps
+(registry/parser setup, per-file `fix_ds`, concat, virtual-chunk-container
+config, write, verify).
+
+**Note:** it calls the deprecated `ds.virtualize.to_icechunk(...)` accessor.
+Use `ds.vz.to_icechunk(...)` instead — see the `.ipynb` example above and
+`.claude/skills/icechunk-datacube-ingestion/formats/HDF5.md`.
+
 For building your own notebook against your own NetCDF, GeoTIFF, or GRIB
 data, ask Claude Code to ingest it — the `icechunk-datacube-ingestion` skill
 in `.claude/skills/` will guide the process end to end.

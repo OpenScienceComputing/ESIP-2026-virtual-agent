@@ -103,7 +103,7 @@ Claude Code edits `.ipynb` files with its built-in notebook-editing tool and run
 
 ## Step 5 — Build your virtual dataset
 
-Look at [`examples/taranto-icechunk-append.ipynb`](examples/taranto-icechunk-append.ipynb) for a worked example of a real virtual Icechunk workflow (create-or-append, date-diffing, per-file normalization before concat). It targets a different workshop's storage, so read it for the pattern rather than running it directly — see [`examples/README.md`](examples/README.md).
+Look at [`examples/taranto-icechunk-append.ipynb`](examples/taranto-icechunk-append.ipynb) (and the shorter, single-file [`.py` version](examples/taranto-icechunk-append.py)) for a worked example of a real virtual Icechunk workflow (create-or-append, date-diffing, per-file normalization before concat). Both target a different workshop's storage, so read them for the pattern rather than running them directly — see [`examples/README.md`](examples/README.md).
 
 Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn into a virtual Icechunk or Arraylake store. The `icechunk-datacube-ingestion` skill vendored in this repo (`.claude/skills/`, from [earth-mover/agent-skills](https://github.com/earth-mover/agent-skills)) will guide Claude Code through gathering requirements, scanning your data, planning the ingestion, and validating the result.
 
