@@ -87,7 +87,7 @@ Then, in `claude`, describe the NetCDF/GeoTIFF/GRIB collection you want to turn 
 
 Sample prompt to get started:
 
-> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip-qhub-public object storage so anyone can access
+> Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip-qhub-public/esip2026-breakout/\<your name\> object storage so anyone can access
 
 ## Beyond this workshop
 
