@@ -64,13 +64,13 @@ sky launch -c "$MACHINE_NAME" notebook.sky.yaml --env JUPYTER_TOKEN -y -d
 
 `-d` (`--detach-run`) is required — without it, `sky launch` would wait for JupyterLab (a long-running server) to exit, which never happens, and just hang your terminal instead of returning control.
 
-This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Check progress and get the URL once it's ready:
+This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Check progress and print the ready-to-click URL once it's up:
 
 ```bash
-sky status "$MACHINE_NAME" --endpoint 8888
+echo "http://$(sky status "$MACHINE_NAME" --endpoint 8888 2>/dev/null)/lab?token=$JUPYTER_TOKEN"
 ```
 
-Once that prints an address, open `http://<that address>/lab?token=$JUPYTER_TOKEN` in your browser (run `echo $JUPYTER_TOKEN` if you need to see the token again).
+Open that URL in your browser. If it prints `http:///lab?token=...` (empty address), the VM isn't ready yet — wait a bit and re-run the command.
 
 By default this launches wherever SkyPilot finds AWS capacity (commonly `us-east-1`, matching most AWS Open Data and this workshop's S3 bucket). To pin a region — e.g. if your source data is in `us-west-2` — add `--infra aws/us-west-2` to the `sky launch` command.
 
