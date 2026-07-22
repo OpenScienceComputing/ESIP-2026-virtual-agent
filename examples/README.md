@@ -21,15 +21,15 @@ Read it for the pattern, not to execute it:
 - `Repository.open(...)` falling back to `Repository.create(...)`, then
   `writable_session` + `ds.vz.to_icechunk(...)` + `commit(...)`.
 
-## `taranto-icechunk-append.py`
+## `taranto-icechunk-tubitak-append.py`
 
-An earlier, simpler plain-Python version of the same Taranto append
-workflow (from a different prior workshop's `scripts/` directory) —
-appends just the single latest NOS/OUS file rather than date-diffing a
-whole batch, and also targets `protocoast-data` storage, not this
-workshop's. Useful as a shorter, linear read of the same core steps
-(registry/parser setup, per-file `fix_ds`, concat, virtual-chunk-container
-config, write, verify).
+A more recent plain-Python version of the same Taranto append workflow
+(from a different prior workshop's `scripts/` directory), also targeting
+`protocoast-data` storage — not this workshop's. Same date-diffing
+create-or-append pattern as the `.ipynb` example, plus CF-UGRID mesh
+topology metadata (`mesh_topology`, `face_node_connectivity`, etc.) added
+to the merged dataset before writing. Useful as a shorter, linear,
+script-form read of the same steps.
 
 **Note:** it calls the deprecated `ds.virtualize.to_icechunk(...)` accessor.
 Use `ds.vz.to_icechunk(...)` instead — see the `.ipynb` example above and
