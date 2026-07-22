@@ -101,6 +101,10 @@ Sample prompt to get started:
 
 > Let's create a virtual icechunk dataset for the NOAA CDR NDVI data on AWS Open Data. Let's start with just a few files as a smoke test, and write the repo to s3://esip2026-breakout/\<your name\> object storage so anyone can access
 
+Once that succeeds, try:
+
+> Make a notebook that visualizes the icechunk using hvplot
+
 Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`, in `us-east-1` — a bucket dedicated to this workshop, writable by the shared `bedrock-class` credentials (reads are public bucket-wide). Use this regardless of which `--region` you launched your notebook in: virtual references are tiny (just manifests, not copies of the source data), so the store's own region doesn't matter the way the notebook VM's region does.
 
 ## Beyond this workshop
