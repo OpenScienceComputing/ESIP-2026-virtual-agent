@@ -121,6 +121,6 @@ echo "The icechunk-datacube-ingestion skill is already available in this repo"
 echo "at .claude/skills/ - no separate install step needed."
 echo
 echo "Next steps:"
-echo "  Open a new terminal (it'll pick up ~/.bashrc automatically), or run 'source ~/.bashrc' in this one, then:"
-echo "  cd ~/ESIP-2026-virtual-agent"
+echo "  Open a new terminal (it'll pick up ~/.bashrc automatically - JupyterLab terminals always start in the notebook root), or run 'source ~/.bashrc' in this one, then:"
+echo "  cd ESIP-2026-virtual-agent"
 echo "  claude"

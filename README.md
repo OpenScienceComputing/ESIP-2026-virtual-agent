@@ -58,8 +58,8 @@ coiled notebook start --name <your-name>-esip2026 --region us-west-2 --vm-type m
 In a terminal inside the JupyterLab that just opened:
 
 ```bash
-git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git ~/ESIP-2026-virtual-agent
-cd ~/ESIP-2026-virtual-agent
+git clone https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent.git
+cd ESIP-2026-virtual-agent
 ```
 
 ## Step 4 — Set up Claude Code
@@ -69,7 +69,7 @@ export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
 export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 bash setup_claude_agent.sh
 source ~/.bashrc
-cd ~/ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here
+cd ESIP-2026-virtual-agent   # if you opened a new terminal, you'll need this to get back here (JupyterLab terminals always start in the notebook root)
 claude
 ```
 
