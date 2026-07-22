@@ -64,13 +64,14 @@ sky launch -c "$MACHINE_NAME" notebook.sky.yaml --env JUPYTER_TOKEN -y -d
 
 `-d` (`--detach-run`) is required — without it, `sky launch` would wait for JupyterLab (a long-running server) to exit, which never happens, and just hang your terminal instead of returning control.
 
-This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Check progress and print the ready-to-click URL once it's up:
+This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Once it's up, tunnel to it over SSH rather than exposing it on a public port — this keeps the Jupyter token off the open internet and avoids the browser's "not secure" warning entirely, since traffic goes through the already-encrypted SSH connection SkyPilot set up for you:
 
 ```bash
-echo "http://$(sky status "$MACHINE_NAME" --endpoint 8888 2>/dev/null)/lab?token=$JUPYTER_TOKEN"
+ssh -f -N -L 8888:localhost:8888 "$MACHINE_NAME"
+echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
 ```
 
-Open that URL in your browser. If it prints `http:///lab?token=...` (empty address), the VM isn't ready yet — wait a bit and re-run the command.
+Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8888: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8888:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
 
 By default this launches wherever SkyPilot finds AWS capacity (commonly `us-east-1`, matching most AWS Open Data and this workshop's S3 bucket). To pin a region — e.g. if your source data is in `us-west-2` — add `--infra aws/us-west-2` to the `sky launch` command.
 

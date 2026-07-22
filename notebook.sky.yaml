@@ -9,10 +9,10 @@
 # command to finish, which never happens for a long-running server like
 # JupyterLab - it would just hang your terminal instead of returning control.
 #
-# Then, once it's up:
-#   sky status <your-name>-esip2026 --endpoint 8888
-# Open http://<that endpoint>/lab?token=$JUPYTER_TOKEN in your browser
-# (echo $JUPYTER_TOKEN if you need to see it again).
+# Then, once it's up, tunnel to it over SSH (no public port exposed, no
+# cleartext token on the open internet) and open it in your browser:
+#   ssh -f -N -L 8888:localhost:8888 <your-name>-esip2026
+#   echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
 
 name: esip2026-notebook
 
@@ -24,7 +24,8 @@ resources:
   infra: aws
   cpus: 4
   disk_size: 50
-  ports: 8888
+  # No `ports:` - JupyterLab is reached only via SSH tunnel (see header),
+  # not exposed on a public port. Keeps the token off the open internet.
   autostop:
     idle_minutes: 30
     down: true
@@ -54,4 +55,4 @@ run: |
   eval "$(micromamba shell hook --shell bash)"
   micromamba activate esip2026
   cd ~/sky_workdir
-  jupyter lab --no-browser --ip=0.0.0.0 --port=8888 --IdentityProvider.token="$JUPYTER_TOKEN"
+  jupyter lab --no-browser --ip=127.0.0.1 --port=8888 --IdentityProvider.token="$JUPYTER_TOKEN"
