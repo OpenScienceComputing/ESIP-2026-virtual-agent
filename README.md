@@ -59,16 +59,19 @@ Pick the AWS region your source data actually lives in — compute close to the 
 ```bash
 export MACHINE_NAME="${GITHUB_USER:-$USER}-esip2026"
 export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
-sky launch -c "$MACHINE_NAME" notebook.sky.yaml --infra aws/us-east-1 --env JUPYTER_TOKEN -y -d
+sky launch -c "$MACHINE_NAME" notebook.sky.yaml --infra aws/us-east-1 \
+  --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env JUPYTER_TOKEN -y -d
 ```
 
 (Swap `--infra aws/us-west-2` if that's where your data is. `--infra` is required, not optional — without it SkyPilot picks whatever AWS region happens to have capacity, which may not be near your data.)
 
 `MACHINE_NAME` picks up your GitHub username automatically on a Codespace (`$GITHUB_USER`, set by Codespaces itself) or your system username elsewhere (`$USER`) — this is how we'll tell everyone's machines apart in the shared AWS account. `export MACHINE_NAME=whatever-you-like-esip2026` instead if you'd rather set it explicitly.
 
+`--env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY` (no `=value`) pass through the credentials you already exported in Step 2 — the same ones authenticating SkyPilot itself. The VM uses them to install and configure Claude Code automatically during setup, so you never have to type them a second time.
+
 `-d` (`--detach-run`) is required — without it, `sky launch` would wait for JupyterLab (a long-running server) to exit, which never happens, and just hang your terminal instead of returning control.
 
-This takes a few minutes (VM boot + installing the environment) — **around 5–7 minutes end to end**, not instant. Once it's up, tunnel to it over SSH rather than exposing it on a public port — this keeps the Jupyter token off the open internet and avoids the browser's "not secure" warning entirely, since traffic goes through the already-encrypted SSH connection SkyPilot set up for you:
+This takes a few minutes (VM boot + installing the environment + Claude Code) — **around 5–8 minutes end to end**, not instant. Once it's up, tunnel to it over SSH rather than exposing it on a public port — this keeps the Jupyter token off the open internet and avoids the browser's "not secure" warning entirely, since traffic goes through the already-encrypted SSH connection SkyPilot set up for you:
 
 ```bash
 ssh -f -N -L 8888:localhost:8888 "$MACHINE_NAME"
@@ -79,18 +82,9 @@ Open that URL in your browser. If the `ssh` command fails (connection refused), 
 
 **On a Codespace**, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token (`echo $JUPYTER_TOKEN`) into that page once — Jupyter remembers you for the rest of the session after that.
 
-## Step 4 — Set up Claude Code
+## Step 4 — Use Claude Code
 
-Open a terminal on the VM — either SSH in (`ssh "$MACHINE_NAME"`, using the alias SkyPilot just set up for you) or use the Terminal tile in the JupyterLab launcher you just opened. Either way, land in `~/sky_workdir` (this repo, already synced there):
-
-```bash
-cd ~/sky_workdir
-export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
-export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
-bash setup_claude_agent.sh
-```
-
-Then open a **new** terminal (SSH in again, or a new JupyterLab Terminal tile) — that's what picks up everything the script just configured:
+Claude Code is already installed and configured by the time the VM is up — Step 3's launch command set that up automatically. Just open a terminal on the VM — either SSH in (`ssh "$MACHINE_NAME"`, using the alias SkyPilot just set up for you) or use the Terminal tile in the JupyterLab launcher you just opened — and land in `~/sky_workdir` (this repo, already synced there):
 
 ```bash
 cd ~/sky_workdir
@@ -99,7 +93,7 @@ claude
 
 `claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md` and `.claude/skills/`.
 
-This installs Claude Code, points it at AWS Bedrock, and writes the same credentials to `~/.aws/credentials` (so notebook code you run — not just Claude Code itself — can write to S3 with them). See `setup_claude_agent.sh` for details.
+If `claude` isn't found or Bedrock doesn't work, the automatic setup may have been skipped (e.g. you launched without the `--env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY` flags) — run it by hand: `export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... && bash ~/sky_workdir/setup_claude_agent.sh`, then open a new terminal.
 
 Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection set up on these VMs for this workshop.
 

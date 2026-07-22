@@ -2,18 +2,19 @@
 # Set up Claude Code (via AWS Bedrock) on a SkyPilot-launched notebook VM
 # for the ESIP 2026 virtual-agent breakout.
 #
-# Run this from a terminal on the VM launched by `sky launch ... notebook.sky.yaml`
-# (SSH in with `ssh <your-cluster-name>`, or use the JupyterLab browser terminal),
-# from within ~/sky_workdir (this repo, synced there automatically):
+# notebook.sky.yaml already runs this automatically during VM setup, using
+# the same AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY passed to `sky launch`
+# via --env - attendees don't need to run this by hand. It's here as a
+# standalone script mainly for manual re-runs/troubleshooting. To run it
+# yourself, from ~/sky_workdir (this repo) on the VM:
 #
-#   export BEDROCK_ACCESS_KEY_ID=<shared key id, announced at the event>
-#   export BEDROCK_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
+#   export AWS_ACCESS_KEY_ID=<shared key id, announced at the event>
+#   export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 #   bash setup_claude_agent.sh
 #
-# Never hardcode the Bedrock credentials in this file (or any other
-# repo-tracked file) - they're read from the environment and written only to
-# ~/.profile, ~/.bashrc, and ~/.aws/, none of which live in the repo or get
-# committed.
+# Never hardcode these credentials in this file (or any other repo-tracked
+# file) - they're read from the environment and written only to ~/.profile,
+# ~/.bashrc, and ~/.aws/, none of which live in the repo or get committed.
 #
 # Claude Code edits .ipynb files with its built-in NotebookEdit tool, and
 # verifies them with `jupyter nbconvert --execute` (see AGENTS.md), rather
@@ -21,10 +22,10 @@
 
 set -euo pipefail
 
-if [[ -z "${BEDROCK_ACCESS_KEY_ID:-}" || -z "${BEDROCK_SECRET_ACCESS_KEY:-}" ]]; then
-  echo "ERROR: set BEDROCK_ACCESS_KEY_ID and BEDROCK_SECRET_ACCESS_KEY first, e.g.:" >&2
-  echo "  export BEDROCK_ACCESS_KEY_ID=..." >&2
-  echo "  export BEDROCK_SECRET_ACCESS_KEY=..." >&2
+if [[ -z "${AWS_ACCESS_KEY_ID:-}" || -z "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
+  echo "ERROR: set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY first, e.g.:" >&2
+  echo "  export AWS_ACCESS_KEY_ID=..." >&2
+  echo "  export AWS_SECRET_ACCESS_KEY=..." >&2
   echo "  bash setup_claude_agent.sh" >&2
   exit 1
 fi
@@ -57,8 +58,8 @@ for RC_FILE in "$HOME/.bashrc" "$HOME/.profile"; do
 
 $PROFILE_MARKER_BEGIN
 export PATH="\$HOME/.local/bin:$ENV_BIN_PREFIX\$PATH"
-export AWS_ACCESS_KEY_ID="$BEDROCK_ACCESS_KEY_ID"
-export AWS_SECRET_ACCESS_KEY="$BEDROCK_SECRET_ACCESS_KEY"
+export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
 export AWS_REGION=us-west-2
 export CLAUDE_CODE_USE_BEDROCK=1
 # NOTE: this must be a current Bedrock cross-region inference profile id, not
@@ -69,8 +70,11 @@ $PROFILE_MARKER_END
 EOF
   fi
 done
-# shellcheck disable=SC1090,SC1091
-source "$HOME/.bashrc"
+# Don't rely on `source ~/.bashrc` alone - most .bashrc templates early-return
+# for non-interactive shells, which this script may be running as (e.g. when
+# notebook.sky.yaml's setup: step calls it). Export PATH directly too, so the
+# Claude Code install below sees it regardless of execution context.
+export PATH="$HOME/.local/bin:$ENV_BIN_PREFIX$PATH"
 
 # Also write ~/.aws/credentials (not just shell env vars). This matters
 # because the Jupyter kernel notebooks actually execute in was already
@@ -90,8 +94,8 @@ else
 
 $AWS_MARKER_BEGIN
 [default]
-aws_access_key_id = $BEDROCK_ACCESS_KEY_ID
-aws_secret_access_key = $BEDROCK_SECRET_ACCESS_KEY
+aws_access_key_id = $AWS_ACCESS_KEY_ID
+aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
 $AWS_MARKER_END
 EOF
 fi

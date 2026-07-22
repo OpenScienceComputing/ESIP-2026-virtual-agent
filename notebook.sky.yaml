@@ -1,9 +1,16 @@
-# SkyPilot task: launch a JupyterLab VM on AWS for the ESIP 2026 breakout.
+# SkyPilot task: launch a JupyterLab VM on AWS for the ESIP 2026 breakout,
+# with Claude Code (via AWS Bedrock) already installed and configured.
 #
 #   export AWS_ACCESS_KEY_ID=<shared key id, announced at the event>
 #   export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 #   export JUPYTER_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
-#   sky launch -c <your-name>-esip2026 notebook.sky.yaml --infra aws/us-east-1 --env JUPYTER_TOKEN -y -d
+#   sky launch -c <your-name>-esip2026 notebook.sky.yaml --infra aws/us-east-1 \
+#     --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env JUPYTER_TOKEN -y -d
+#
+# --env AWS_ACCESS_KEY_ID (no =value) passes through your already-exported
+# local value - the same credentials authenticate SkyPilot itself, so you
+# only type them once. setup_claude_agent.sh (run automatically below) uses
+# them to configure Claude Code/Bedrock/S3 on the VM - no separate step.
 #
 # --infra pins the region - always pass it explicitly (compute close to
 # your data), don't rely on SkyPilot's default of "wherever has capacity".
@@ -36,6 +43,8 @@ resources:
 
 envs:
   JUPYTER_TOKEN: ""
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
 
 setup: |
   "${SHELL}" <(curl -L https://micro.mamba.pm/install.sh) < /dev/null
@@ -48,6 +57,13 @@ setup: |
     hvplot geoviews datashader holoviews panel bokeh \
     pandas numpy matplotlib
   micromamba run -n esip2026 pip install --quiet "gribberish[virtualizarr]" virtual_tiff
+
+  if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+    bash ~/sky_workdir/setup_claude_agent.sh
+  else
+    echo "AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY not passed via --env - skipping Claude Code setup." >&2
+    echo "Run 'bash setup_claude_agent.sh' by hand after SSHing in instead." >&2
+  fi
 
 run: |
   if [ -z "$JUPYTER_TOKEN" ]; then
