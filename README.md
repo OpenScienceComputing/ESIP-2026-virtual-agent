@@ -17,7 +17,7 @@ You'll use [SkyPilot](https://skypilot.co/) to launch a JupyterLab VM on AWS, th
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
-Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited.
+Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited. Make sure you're signed in at github.com first — the **Codespaces** tab in the next step won't show up if you're logged out.
 
 1. Go to this branch on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent/tree/skypilot-explore
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on skypilot-explore**.
@@ -80,7 +80,7 @@ echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
 
 Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8888: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8888:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
 
-**On a Codespace**, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token (`echo $JUPYTER_TOKEN`) into that page once — Jupyter remembers you for the rest of the session after that.
+**On a Codespace**, you'll likely see a "Your application running on port 8888 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token (`echo $JUPYTER_TOKEN`) into that page once — Jupyter remembers you for the rest of the session after that.
 
 ## Step 4 — Use Claude Code
 
@@ -92,6 +92,8 @@ claude
 ```
 
 `claude` must be run from inside this repo, not your home directory — that's what makes it pick up this repo's `CLAUDE.md` and `.claude/skills/`.
+
+The first time you run it, Claude Code will ask "Do you trust the files in this folder?" — say yes, this is the repo you just cloned.
 
 If `claude` isn't found or Bedrock doesn't work, the automatic setup may have been skipped (e.g. you launched without the `--env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY` flags) — run it by hand: `export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... && bash ~/sky_workdir/setup_claude_agent.sh`, then open a new terminal.
 
@@ -112,6 +114,10 @@ Once that succeeds, try:
 > Make a notebook that visualizes the icechunk using hvplot
 
 Write your Icechunk store under `s3://esip2026-breakout/<your-name-or-dataset>/`, in `us-east-1` — a bucket dedicated to this workshop, writable by the shared credentials (reads are public bucket-wide). Use this regardless of which region you launched your VM in: virtual references are tiny (just manifests, not copies of the source data), so the store's own region doesn't matter the way the VM's region does.
+
+Don't be alarmed if Claude Code hits errors along the way and keeps iterating — reading a traceback, adjusting, and retrying is normal agentic behavior, not a sign something is broken. Let it keep working.
+
+If you close your terminal or come back later, just `cd ~/sky_workdir && claude` again — it's the same repo, and you can ask it to re-run the notebook it built for you rather than remembering the exact command yourself.
 
 ## When you're done
 
