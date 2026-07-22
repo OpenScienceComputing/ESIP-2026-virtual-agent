@@ -76,11 +76,12 @@ This takes a few minutes (VM boot + installing the environment + Claude Code) �
 ```bash
 ssh -f -N -L 8888:localhost:8888 "$MACHINE_NAME"
 echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
+echo "Token (paste this if prompted): $JUPYTER_TOKEN"
 ```
 
 Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8888: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8888:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
 
-**On a Codespace**, you'll likely see a "Your application running on port 8888 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token (`echo $JUPYTER_TOKEN`) into that page once — Jupyter remembers you for the rest of the session after that.
+**On a Codespace**, you'll likely see a "Your application running on port 8888 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token printed above into that page once — Jupyter remembers you for the rest of the session after that.
 
 ## Step 4 — Use Claude Code
 
