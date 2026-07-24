@@ -19,7 +19,7 @@ You'll run a remote JupyterLab server on AWS via [Coiled](https://www.coiled.io/
 
 ### Don't have a Linux/WSL/macOS machine? Use a GitHub Codespace
 
-Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited. Make sure you're signed in at github.com first — the **Codespaces** tab in the next step won't show up if you're logged out.
+Requires your own (free) GitHub account — the Codespace runs under your account and against your own free monthly Codespaces hours, not the repo owner's. Plenty for this workshop, just not unlimited. Make sure you're signed in at github.com first — the **Codespaces** tab in the next step won't show up if you're logged out. Don't have an account? Sign up free at [github.com/signup](https://github.com/signup) — takes a minute.
 
 1. Go to this repo on GitHub: https://github.com/OpenScienceComputing/ESIP-2026-virtual-agent
 2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
