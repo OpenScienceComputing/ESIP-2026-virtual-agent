@@ -20,9 +20,12 @@
 # JupyterLab - it would just hang your terminal instead of returning control.
 #
 # Then, once it's up, tunnel to it over SSH (no public port exposed, no
-# cleartext token on the open internet) and open it in your browser:
-#   ssh -f -N -L 8888:localhost:8888 <your-name>-esip2026
-#   echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
+# cleartext token on the open internet) and open it in your browser. Local
+# side is 8889, not 8888, so this doesn't collide with a JupyterLab you may
+# already have running locally on the default port - the remote side stays
+# 8888, matching the `jupyter lab --port=8888` below:
+#   ssh -f -N -L 8889:localhost:8888 <your-name>-esip2026
+#   echo "http://localhost:8889/lab?token=$JUPYTER_TOKEN"
 
 name: esip2026-notebook
 
@@ -50,13 +53,22 @@ setup: |
   "${SHELL}" <(curl -L https://micro.mamba.pm/install.sh) < /dev/null
   export PATH="$HOME/.local/bin:$PATH"
   micromamba create -y -n esip2026 -c conda-forge \
-    python=3.12 jupyterlab ipywidgets ipympl \
+    python=3.12 jupyterlab ipywidgets ipympl nodejs \
     icechunk virtualizarr zarr xarray dask distributed \
     arraylake obstore s3fs fsspec h5netcdf h5py cftime nc-time-axis cf_xarray \
     rioxarray rasterio gdal pyproj cartopy geopandas shapely \
     hvplot geoviews datashader holoviews panel bokeh \
     pandas numpy matplotlib
   micromamba run -n esip2026 pip install --quiet "gribberish[virtualizarr]" virtual_tiff
+
+  # Gemini CLI - a fallback agent in case Claude Code/Bedrock is overloaded
+  # or unavailable during the event. Installs into the esip2026 env's own
+  # node/npm (via the `nodejs` conda-forge package above), so its binary
+  # lands on the same env bin/ that setup_claude_agent.sh below already puts
+  # on PATH - no separate PATH wiring needed. Needs no AWS creds, so this
+  # runs unconditionally, unlike the Claude Code setup below. Auth is a
+  # per-attendee interactive step (personal Google login) - see README.md.
+  micromamba run -n esip2026 npm install --quiet --global @google/gemini-cli
 
   if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
     bash ~/sky_workdir/setup_claude_agent.sh

@@ -74,14 +74,16 @@ sky launch -c "$MACHINE_NAME" notebook.sky.yaml --infra aws/us-east-1 \
 This takes a few minutes (VM boot + installing the environment + Claude Code) — **around 5–8 minutes end to end**, not instant. Once it's up, tunnel to it over SSH rather than exposing it on a public port — this keeps the Jupyter token off the open internet and avoids the browser's "not secure" warning entirely, since traffic goes through the already-encrypted SSH connection SkyPilot set up for you:
 
 ```bash
-ssh -f -N -L 8888:localhost:8888 "$MACHINE_NAME"
-echo "http://localhost:8888/lab?token=$JUPYTER_TOKEN"
+ssh -f -N -L 8889:localhost:8888 "$MACHINE_NAME"
+echo "http://localhost:8889/lab?token=$JUPYTER_TOKEN"
 echo "Token (paste this if prompted): $JUPYTER_TOKEN"
 ```
 
-Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8888: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8888:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
+The local side is `8889`, not `8888` — deliberately, so this doesn't collide with a JupyterLab you may already have running locally on the default port `8888`. The remote side stays `8888` (that's what `jupyter lab` binds to on the VM, set in `notebook.sky.yaml`); only the local end of the tunnel moved.
 
-**On a Codespace**, you'll likely see a "Your application running on port 8888 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token printed above into that page once — Jupyter remembers you for the rest of the session after that.
+Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8889: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8889:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
+
+**On a Codespace**, you'll likely see a "Your application running on port 8889 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token printed above into that page once — Jupyter remembers you for the rest of the session after that.
 
 ## Step 4 — Use Claude Code
 
@@ -99,6 +101,19 @@ The first time you run it, Claude Code will ask "Do you trust the files in this 
 If `claude` isn't found or Bedrock doesn't work, the automatic setup may have been skipped (e.g. you launched without the `--env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY` flags) — run it by hand: `export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... && bash ~/sky_workdir/setup_claude_agent.sh`, then open a new terminal.
 
 Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection set up on these VMs for this workshop.
+
+### If Claude is overloaded: Gemini CLI is available as a fallback
+
+The VM also has [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed (`gemini`) — if Claude is having a busy period during the event, switch to it without waiting:
+
+```bash
+cd ~/sky_workdir
+gemini
+```
+
+The first time you run it, it needs you to sign in with your own (free) personal Google account — there's no shared credential for this one, unlike Bedrock. It'll print a URL: open that in a browser on *any* machine (your laptop is fine, the VM has no display), sign in, and paste the resulting code back into the `gemini` prompt on the VM. After that first login it's cached for the rest of the session.
+
+`gemini` also picks up this repo's `AGENTS.md` automatically (via `.gemini/settings.json`), so it gets the same environment/workflow instructions Claude Code gets from `CLAUDE.md` — just without the HoloViz/icechunk skills, which are Claude Code-specific.
 
 ## Step 5 — Build your virtual dataset
 
