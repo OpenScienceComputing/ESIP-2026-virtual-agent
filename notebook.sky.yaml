@@ -53,7 +53,7 @@ setup: |
   "${SHELL}" <(curl -L https://micro.mamba.pm/install.sh) < /dev/null
   export PATH="$HOME/.local/bin:$PATH"
   micromamba create -y -n esip2026 -c conda-forge \
-    python=3.12 jupyterlab ipywidgets ipympl nodejs \
+    python=3.12 jupyterlab ipywidgets ipympl \
     icechunk virtualizarr zarr xarray dask distributed \
     arraylake obstore s3fs fsspec h5netcdf h5py cftime nc-time-axis cf_xarray \
     rioxarray rasterio gdal pyproj cartopy geopandas shapely \
@@ -61,14 +61,26 @@ setup: |
     pandas numpy matplotlib
   micromamba run -n esip2026 pip install --quiet "gribberish[virtualizarr]" virtual_tiff
 
-  # Gemini CLI - a fallback agent in case Claude Code/Bedrock is overloaded
-  # or unavailable during the event. Installs into the esip2026 env's own
-  # node/npm (via the `nodejs` conda-forge package above), so its binary
-  # lands on the same env bin/ that setup_claude_agent.sh below already puts
-  # on PATH - no separate PATH wiring needed. Needs no AWS creds, so this
+  # Antigravity CLI (agy) - a fallback agent in case Claude Code/Bedrock is
+  # overloaded or unavailable during the event. Google retired free/Pro/Ultra
+  # OAuth login for the older Gemini CLI on 2026-06-18 in favor of this tool,
+  # so it's the current supported path for attendees using a personal Google
+  # account. Native installer (no Node.js needed) - puts `agy` in
+  # ~/.local/bin, already on PATH (see the export above and
+  # setup_claude_agent.sh's PATH wiring below). Needs no AWS creds, so this
   # runs unconditionally, unlike the Claude Code setup below. Auth is a
-  # per-attendee interactive step (personal Google login) - see README.md.
-  micromamba run -n esip2026 npm install --quiet --global @google/gemini-cli
+  # per-attendee interactive step (personal Google login, free tier - prints
+  # a URL to open locally and a code to paste back, works fine from both a
+  # raw SSH session and a JupyterLab terminal) - see README.md.
+  curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+  # Auto-approve the tool categories this workshop's workflow needs (shell
+  # commands - which covers Python invocations too - and web search/fetch),
+  # matching the trust level .claude/settings.json already grants Claude Code
+  # in this repo. Global, not project-level - agy has no documented
+  # project-level settings.json equivalent to .claude/settings.json.
+  mkdir -p ~/.gemini/antigravity-cli
+  printf '%s\n' '{"permissions": {"allow": ["command(*)", "read_url(*)", "execute_url(*)"]}}' > ~/.gemini/antigravity-cli/settings.json
 
   if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
     bash ~/sky_workdir/setup_claude_agent.sh

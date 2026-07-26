@@ -102,18 +102,20 @@ If `claude` isn't found or Bedrock doesn't work, the automatic setup may have be
 
 Claude Code edits `.ipynb` files with its built-in notebook-editing tool and runs them with `jupyter nbconvert --execute` to verify real outputs (see `CLAUDE.md`/`AGENTS.md`) — there's no live Jupyter MCP connection set up on these VMs for this workshop.
 
-### If Claude is overloaded: Gemini CLI is available as a fallback
+### If Claude is overloaded: Antigravity CLI is available as a fallback
 
-The VM also has [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed (`gemini`) — if Claude is having a busy period during the event, switch to it without waiting:
+The VM also has [Antigravity CLI](https://antigravity.google/) installed (`agy`) — if Claude is having a busy period during the event, switch to it without waiting. This works both from an SSH terminal and from a JupyterLab terminal tile — tested both ways:
 
 ```bash
 cd ~/sky_workdir
-gemini
+agy
 ```
 
-The first time you run it, it needs you to sign in with your own (free) personal Google account — there's no shared credential for this one, unlike Bedrock. It'll print a URL: open that in a browser on *any* machine (your laptop is fine, the VM has no display), sign in, and paste the resulting code back into the `gemini` prompt on the VM. After that first login it's cached for the rest of the session.
+The first time you run it, it needs you to sign in with your own (free) personal Google account — there's no shared credential for this one, unlike Bedrock. It detects it's running remotely and prints a URL: open that in a browser on *any* machine (your laptop is fine, the VM has no display), sign in, and paste the resulting code back into the `agy` prompt on the VM. After that first login it's cached for the rest of the session. The free tier is rate-limited (a modest number of requests per few hours, refreshing on a weekly ceiling) but requires no payment.
 
-`gemini` also picks up this repo's `AGENTS.md` automatically (via `.gemini/settings.json`), so it gets the same environment/workflow instructions Claude Code gets from `CLAUDE.md` — just without the HoloViz/icechunk skills, which are Claude Code-specific.
+`agy` picks up this repo's `AGENTS.md` automatically, so it gets the same environment/workflow instructions Claude Code gets from `CLAUDE.md` — just without the HoloViz/icechunk skills, which are Claude Code-specific. VM setup also pre-approves the tool categories this workflow needs (shell/Python commands, web search, web fetch) so `agy` won't stop to ask permission for those.
+
+(Older Gemini CLI is not used here — Google retired free/Pro/Ultra Google-account login for it on June 18, 2026 in favor of Antigravity CLI.)
 
 ## Step 5 — Build your virtual dataset
 
