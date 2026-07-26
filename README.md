@@ -137,6 +137,28 @@ Don't be alarmed if Claude Code hits errors along the way and keeps iterating �
 
 If you close your terminal or come back later, just `cd ~/sky_workdir && claude` again — it's the same repo, and you can ask it to re-run the notebook it built for you rather than remembering the exact command yourself.
 
+## Access your virtual icechunk through Arraylake (Optional)
+
+[Arraylake](https://www.earthmover.io/arraylake) is Earthmover's managed catalog for Icechunk repositories — it adds a web UI, org-level access control, and version browsing on top of the plain Icechunk-on-S3 store you already built in Step 5. This is entirely optional — your store already works fine as-is without it.
+
+Unlike Bedrock or a personal Google account, Arraylake isn't self-serve — access is org-invite-only. This workshop has a shared `esip-workshop-2026` org with a bucket config (`esip2026-breakout`) already pointing at this workshop's S3 bucket. **Ask the organizers to invite you to that org** (this happens live during the event) before trying the steps below.
+
+Once you've been invited, log in from the VM:
+
+```bash
+python3 -c "from arraylake import Client; Client().login()"
+```
+
+Follow the printed instructions to finish signing in from a browser on any machine (same idea as the Antigravity CLI login above — the VM has no display, so it can't open one itself).
+
+Then, back in `claude` (or the fallback agent), ask it to register the store you already wrote to S3 with Arraylake's catalog:
+
+> Import my icechunk store at s3://esip2026-breakout/\<your-name-or-dataset\> into the esip-workshop-2026 Arraylake org, using the esip2026-breakout bucket config, and set up whatever virtual chunk access policy it needs since this is a virtual store
+
+The `icechunk-datacube-ingestion` skill vendored in this repo already knows Arraylake requires a Virtual Chunk Access Policy for virtual (manifest-only) stores — let the agent work out the exact API calls rather than typing them by hand.
+
+Once imported, browse it (and everyone else's) at `https://app.earthmover.io/esip-workshop-2026/repositories`.
+
 ## When you're done
 
 ```bash
