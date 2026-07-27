@@ -23,3 +23,4 @@ Task-specific guidance lives in skills under `.claude/skills/` and loads automat
 
 - `icechunk-datacube-ingestion` (vendored from [earth-mover/agent-skills](https://github.com/earth-mover/agent-skills)) covers ingesting NetCDF/HDF5/TIFF/GRIB/Zarr collections into an Icechunk or Arraylake datacube — see `.claude/skills/icechunk-datacube-ingestion/SKILL.md`.
 - `visualizing-with-hvplot` covers plotting the resulting xarray data with hvplot (when to use `rasterize=True`, `geo=True`/`tiles="OSM"`, and not narrating CF encoding internals) — see `.claude/skills/visualizing-with-hvplot/SKILL.md`.
+- `ugrid-ocean-model-metadata` covers adding UGRID Conventions mesh topology metadata when ingesting unstructured-grid ocean model output (FVCOM, ADCIRC, SHYFEM, SCHISM, ICON, Delft3D/D-Flow FM) so xugrid/uxarray can read the mesh — see `.claude/skills/ugrid-ocean-model-metadata/SKILL.md`.
