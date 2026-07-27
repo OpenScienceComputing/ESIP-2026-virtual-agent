@@ -1,6 +1,6 @@
 ---
 name: visualizing-with-hvplot
-description: How to visualize an xarray Dataset/DataArray (e.g. opened from an Icechunk or Arraylake store) with hvplot. Use whenever the user asks to plot, visualize, or explore data that was just read with xarray - especially gridded (lon/lat) or time series data from a virtual/native Icechunk store.
+description: How to visualize an xarray Dataset/DataArray (e.g. opened from an Icechunk or Arraylake store) with hvplot. Use whenever the user asks to plot, visualize, or explore data that was just read with xarray - especially gridded (lon/lat) or time series data from a virtual/native Icechunk store, and unstructured-mesh/UGRID data (e.g. from FVCOM, ADCIRC, SCHISM, SHYFEM, ICON, Delft3D) which needs xugrid + `.hvplot.trimesh` instead of `.hvplot.quadmesh`.
 ---
 
 # Visualizing xarray data with hvplot
@@ -49,3 +49,26 @@ ds["var"].hvplot.quadmesh(
 Skip `geo=True`/`tiles` for plots that aren't on a geographic coordinate
 system (e.g. a time series, or a plot over model grid indices rather than
 lon/lat).
+
+## UGRID-compliant (unstructured mesh) data needs xugrid + `.hvplot.trimesh`
+
+If the dataset has UGRID Conventions mesh topology metadata (e.g. built
+with the `ugrid-ocean-model-metadata` skill, or already-native output from
+ADCIRC/Delft3D/SCHISM) - `ds.hvplot.quadmesh(...)` won't work, since
+there's no regular x/y grid to plot against. Convert to an xugrid dataset
+first, then use `.hvplot.trimesh`, not `.hvplot.quadmesh`:
+
+```python
+import xugrid as xu
+import hvplot.xugrid  # registers the .hvplot accessor on xugrid objects
+
+uds = xu.UgridDataset(ds)
+uds["hs"].hvplot.trimesh(
+    geo=True, rasterize=True, tiles="CartoLight", cmap="viridis",
+)
+```
+
+The `rasterize=True` and `geo=True`/`tiles` guidance above applies here
+too - a mesh plot has the same cell-count blowup risk as a quadmesh, and
+the same need for geographic projection handling when the mesh is in
+lon/lat.
