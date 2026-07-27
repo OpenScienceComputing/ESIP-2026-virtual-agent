@@ -166,7 +166,3 @@ sky down "${MACHINE_NAME:-${GITHUB_USER:-$USER}-esip2026}"
 ```
 
 Tears down the VM immediately. If you forget, `notebook.sky.yaml` sets a 30-minute idle auto-shutdown as a safety net, but don't rely on it — clean up when you're finished.
-
-## Beyond this workshop
-
-For your own future scientific work, also check out [Claude Science](https://claude.com/product/claude-science), Anthropic's AI workbench for research (databases, compute, and reusable skills for genomics, proteomics, structural biology, and more). It's a different product from Claude Code — built for Claude.ai Pro/Max/Team/Enterprise plans rather than the Bedrock-billed setup used here — so it's not part of this breakout, but worth knowing about.
