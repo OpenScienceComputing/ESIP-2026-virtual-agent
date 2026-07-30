@@ -46,7 +46,7 @@ Create a fresh Python environment for this — don't reuse an existing conda env
 
 ```bash
 # conda / micromamba
-conda create -n skypilot python=3.11 -y
+conda create -n skypilot python=3.11 pip -y
 conda activate skypilot
 
 # — or — venv
