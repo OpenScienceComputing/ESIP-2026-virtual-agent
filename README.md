@@ -63,6 +63,8 @@ export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 sky check aws
 ```
 
+`sky` talks to a persistent background API server (`sky.server.server`) that keeps running across shell sessions. If you ever ran `sky` before creating this fresh environment, that old server is still alive under your *old* Python — so `sky check aws` can fail with a confusing `botocore` `ImportError`/`DataNotFoundError` even though the new environment is set up correctly. If you see that, run `sky api stop` and try `sky check aws` again (it auto-restarts under the currently active environment).
+
 `sky check aws` should report AWS as enabled. No account, no login, no invite — SkyPilot just needs valid AWS credentials, which you already have.
 
 ## Step 3 — Launch a notebook VM on AWS
