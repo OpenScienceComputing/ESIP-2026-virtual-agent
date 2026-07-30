@@ -42,9 +42,22 @@ You need this locally before launching anything — the VM launch config (`noteb
 
 ## Step 2 — Install SkyPilot and authenticate
 
+Create a fresh Python environment for this — don't reuse an existing conda env, and don't `conda install skypilot` (the conda-forge package lags well behind the pip release and can pull in an older, incompatible version). Either `conda`/`micromamba` or `venv` works:
+
 ```bash
-python3 -m pip install --user "skypilot[aws]"
-export PATH="$HOME/.local/bin:$PATH"
+# conda / micromamba
+conda create -n skypilot python=3.11 -y
+conda activate skypilot
+
+# — or — venv
+python3 -m venv ~/.venvs/skypilot
+source ~/.venvs/skypilot/bin/activate
+```
+
+Then, in that new environment:
+
+```bash
+pip install -U "skypilot[aws]"
 export AWS_ACCESS_KEY_ID=<shared key id, announced at the event>
 export AWS_SECRET_ACCESS_KEY=<shared secret key, announced at the event>
 sky check aws
