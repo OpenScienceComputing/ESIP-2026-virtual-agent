@@ -90,13 +90,16 @@ This takes a few minutes (VM boot + installing the environment + Claude Code) �
 
 ```bash
 ssh -f -N -L 8889:localhost:8888 "$MACHINE_NAME"
+echo "Waiting for JupyterLab to actually start responding..."
+until curl -sf -o /dev/null http://localhost:8889/lab; do sleep 3; done
+echo "JupyterLab is ready:"
 echo "http://localhost:8889/lab?token=$JUPYTER_TOKEN"
 echo "Token (paste this if prompted): $JUPYTER_TOKEN"
 ```
 
 The local side is `8889`, not `8888` — deliberately, so this doesn't collide with a JupyterLab you may already have running locally on the default port `8888`. The remote side stays `8888` (that's what `jupyter lab` binds to on the VM, set in `notebook.sky.yaml`); only the local end of the tunnel moved.
 
-Open that URL in your browser. If the `ssh` command fails (connection refused), the VM isn't ready yet — wait a bit and retry. A `bind [127.0.0.1]:8889: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8889:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
+The `curl` loop matters because `sky launch -d` returns as soon as the run command is *submitted*, not once JupyterLab is actually listening — the VM can be SSH-reachable and the tunnel up for a bit before `jupyter lab` finishes starting on the other end. Rather than opening the URL early and getting a connection-refused/blank page, this waits until the tunnel actually gets a response before printing the "ready" line. If the `ssh` command itself fails (connection refused), the VM isn't SSH-ready yet — wait a bit and retry. A `bind [127.0.0.1]:8889: Address already in use` warning is harmless (a dual-stack IPv4/IPv6 quirk) as long as the URL loads — ignore it. The tunnel runs in the background (`-f`) for as long as you need it; find and kill it with `pkill -f "8889:localhost:8888"` when you're done, or it'll close on its own when the VM shuts down.
 
 **On a Codespace**, you'll likely see a "Your application running on port 8889 is available" notification pop up instead — click its **Open in Browser** button rather than (or in addition to) pasting the URL yourself. Either way, the `?token=...` in the URL may not carry through — Codespaces forwards `localhost` ports through its own GitHub-authentication redirect, which can strip the query string, landing you on Jupyter's login page instead of going straight in. If that happens, just paste the token printed above into that page once — Jupyter remembers you for the rest of the session after that.
 
